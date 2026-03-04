@@ -8,8 +8,8 @@ interface SideBarContainerProps {
 }
 
 export const SideBarContainer = styled.aside<SideBarContainerProps>`
-  width: ${props =>
-    props.$openMenu && !props.$isHovering
+  width: ${({ $openMenu, $isHovering }) =>
+    $openMenu && !$isHovering
       ? "4rem"
       : "15rem"};
 
