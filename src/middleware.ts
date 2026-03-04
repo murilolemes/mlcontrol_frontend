@@ -7,8 +7,6 @@ export function middleware(request: NextRequest) {
   const publicRoutes = ["/login"];
   const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname);
 
-  // const isPublicRoute = request.nextUrl.pathname.startsWith("/login");
-
   if (!accessToken && !isPublicRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
@@ -20,5 +18,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login/:path*", "/dashboard/:path"],
+  matcher: ["/:path"],
 }
