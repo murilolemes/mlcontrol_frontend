@@ -42,7 +42,7 @@ export const Form = styled.form`
     }
 
     input {
-      padding: 1rem;
+      padding: 0.5rem;
 
       background: var(--white);
       border: none;

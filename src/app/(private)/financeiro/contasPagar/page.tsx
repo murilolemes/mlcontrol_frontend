@@ -1,9 +1,16 @@
 "use client";
 
-export default function ContasPagarPage() {
+import { AccountsPayableContainer, AccountsPayableContent } from "./styles";
+
+export default function AccountsPayable() {
   return (
-    <div>
-      <h1>Contas a Pagar</h1>
-    </div>
+    <AccountsPayableContainer>
+      <AccountsPayableContent>
+        <h2>Contas à pagar</h2>
+        <div className="accountDescription">
+
+        </div>
+      </AccountsPayableContent>
+    </AccountsPayableContainer>
   )
 }

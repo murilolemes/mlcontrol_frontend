@@ -3,9 +3,7 @@
 import {
   CurrencyDollarIcon,
   HouseIcon,
-  ListDashesIcon,
-  ListPlusIcon,
-  StorefrontIcon,
+  InvoiceIcon,
   TrendDownIcon,
   TrendUpIcon,
   UserCirclePlusIcon,
@@ -38,11 +36,11 @@ const menuItems = [
     children: [
       {
         name: "Lista de Clientes",
-        icon: <UsersThreeIcon size={16} weight="bold" />,
+        icon: <UsersThreeIcon size={16} weight="regular" />,
         path: "/clientes",
       }, {
         name: "Cadastro de Clientes",
-        icon: <UserCirclePlusIcon size={16} weight="bold" />,
+        icon: <UserCirclePlusIcon size={16} weight="regular" />,
         path: "",
       },
     ]
@@ -54,30 +52,18 @@ const menuItems = [
     children: [
       {
         name: "Contas à Receber",
-        icon: <TrendUpIcon size={16} weight="bold" />,
-        path: "",
+        icon: <TrendUpIcon size={16} weight="regular" />,
+        path: "/financeiro/contasReceber",
       },
       {
         name: "Contas à Pagar",
-        icon: <TrendDownIcon size={16} weight="bold" />,
+        icon: <TrendDownIcon size={16} weight="regular" />,
         path: "/financeiro/contasPagar",
       },
-    ],
-  },
-  {
-    name: "Vendas",
-    icon: <StorefrontIcon size={16} weight="fill" />,
-    path: "",
-    children: [
       {
-        name: "Lista de Vendas",
-        icon: <ListDashesIcon size={16} weight="bold" />,
-        path: "",
-      },
-      {
-        name: "Nova Venda",
-        icon: <ListPlusIcon size={16} weight="bold" />,
-        path: "",
+        name: "Config. Financeira",
+        icon: <InvoiceIcon size={16} weight="regular" />,
+        path: "/financeiro/configFinanceira",
       },
     ],
   },

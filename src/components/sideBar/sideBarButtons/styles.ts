@@ -12,7 +12,7 @@ interface SideBarContentProps {
 export const SideBarSubItem = styled.div<SideBarContentProps>`
   width: 100%;
 
-  max-height: ${({ $subMenu }) => $subMenu ? "10rem" : "0"};
+  max-height: ${({ $subMenu }) => $subMenu ? "30rem" : "0"};
   opacity: ${({ $subMenu }) => $subMenu ? 1 : 0};
   overflow: hidden;
 
