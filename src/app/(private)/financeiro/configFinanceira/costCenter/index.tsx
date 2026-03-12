@@ -7,6 +7,10 @@ export default function CostCenter() {
   return (
     <CostCenterContainer>
       <h4>Centro de Custo</h4>
+
+      <h1 className="text-3xl font-bold text-red-500">
+        Tailwind funcionando
+      </h1>
       <CostCenterContent>
         <form action="">
           <input type="text" />
