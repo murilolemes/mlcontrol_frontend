@@ -1,14 +1,12 @@
-import StyledComponentsRegistry from '@/lib/registro';
-import GlobalStyles from "@/styles/global-styles";
 import type { Metadata } from "next";
-import { Montserrat, Geist } from "next/font/google";
+import { Geist, Montserrat } from "next/font/google";
 import "react-toastify/dist/ReactToastify.css";
 import { Providers } from './providers';
 
-import "./globals.css";
 import { cn } from "@/lib/utils";
+import "./globals.css";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -31,12 +29,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={cn("font-sans", geist.variable)}>
-      <body className={montserrat.variable}>
-        <StyledComponentsRegistry>
-          <GlobalStyles />
-          <Providers>{children}</Providers>
-        </StyledComponentsRegistry>
+      <body className={cn("font-sans", geist.variable, montserrat.variable)}>
+        {/* <StyledComponentsRegistry> */}
+        {/* <GlobalStyles /> */}
+        <Providers>{children}</Providers>
+        {/* </StyledComponentsRegistry> */}
       </body>
-    </html>
+    </html >
   );
 }

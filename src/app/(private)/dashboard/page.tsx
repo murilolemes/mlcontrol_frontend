@@ -1,13 +1,11 @@
-"use client";
-
-import { DashboardContainer, DashboardContent } from "./styles";
+'use client';
 
 export default function Dashboard() {
   return (
-    <DashboardContainer>
-      <DashboardContent>
+    <div className="p-2">
+      <div>
         <h2>Dashboard</h2>
-      </DashboardContent>
-    </DashboardContainer>
+      </div>
+    </div>
   );
 }

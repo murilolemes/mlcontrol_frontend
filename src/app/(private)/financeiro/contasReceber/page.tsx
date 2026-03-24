@@ -1,16 +1,12 @@
-"use client";
-
-import { AccountsreceivableContainer, AccountsreceivableContent } from "./styles";
+'use client';
 
 export default function Accountsreceivable() {
   return (
-    <AccountsreceivableContainer>
-      <AccountsreceivableContent>
+    <div className="p-2">
+      <div>
         <h2>Contas à Receber</h2>
-        <div className="accountDescription">
-
-        </div>
-      </AccountsreceivableContent>
-    </AccountsreceivableContainer>
-  )
+        <div className="accountDescription"></div>
+      </div>
+    </div>
+  );
 }

@@ -2,6 +2,7 @@
 
 import {
   CurrencyDollarIcon,
+  GearIcon,
   HouseIcon,
   InvoiceIcon,
   TrendDownIcon,
@@ -59,11 +60,28 @@ const menuItems = [
         name: "Contas à Pagar",
         icon: <TrendDownIcon size={16} weight="regular" />,
         path: "/financeiro/contasPagar",
+      }
+    ],
+  },
+  {
+    name: "Config. Financeira",
+    icon: <GearIcon size={16} weight="fill" />,
+    path: "",
+    children: [
+      {
+        name: "Centro de Custo",
+        icon: <TrendUpIcon size={16} weight="regular" />,
+        path: "/financeiro/centroCusto",
       },
       {
-        name: "Config. Financeira",
+        name: "Tipo de Plano",
+        icon: <TrendDownIcon size={16} weight="regular" />,
+        path: "/financeiro/tipoPlano",
+      },
+      {
+        name: "Plano de Conta",
         icon: <InvoiceIcon size={16} weight="regular" />,
-        path: "/financeiro/configFinanceira",
+        path: "/financeiro/planoContas",
       },
     ],
   },
