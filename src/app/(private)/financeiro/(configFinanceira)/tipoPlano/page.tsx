@@ -248,7 +248,7 @@ export default function TypePlan() {
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-auto px-1">
-      <h4 className="font-bold text-blue-900">Plano de contas</h4>
+      <h4 className="font-bold text-blue-900">Tipo de plano</h4>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -256,14 +256,16 @@ export default function TypePlan() {
           'flex flex-col gap-2 rounded-sm p-2 shadow-[0_0_2px] shadow-gray-400',
         )}
       >
-        <p className="text-sm text-blue-900 underline">
-          Adicionar novo plano de contas
+        <p className="text-sm font-medium text-blue-900">
+          Adicionar novo tipo de plano
         </p>
         <div className="items-top flex gap-2">
           <div className="flex w-full flex-col gap-1">
-            <Label htmlFor="name">Plano de contas</Label>
+            <Label htmlFor="name" className="text-sm font-normal text-gray-400">
+              Tipo de plano
+            </Label>
             <Input
-              placeholder="Digite o plano de contas"
+              placeholder="Digite o tipo de plano"
               id="name"
               className={`${
                 errors.typePlanName &&
@@ -283,7 +285,12 @@ export default function TypePlan() {
           </div>
 
           <div className="flex min-w-fit flex-col gap-1">
-            <Label htmlFor="costCenter">Selecione o tipo de plano</Label>
+            <Label
+              htmlFor="costCenter"
+              className="text-sm font-normal text-gray-400"
+            >
+              Selecione o tipo de plano
+            </Label>
             <Controller
               control={control}
               name="type"
@@ -296,11 +303,21 @@ export default function TypePlan() {
                 >
                   <div className="flex items-center gap-1">
                     <RadioGroupItem value="debito" id="debito" />
-                    <Label htmlFor="debito">Debito</Label>
+                    <Label
+                      htmlFor="debito"
+                      className="text-sm font-normal text-gray-400"
+                    >
+                      Debito
+                    </Label>
                   </div>
                   <div className="flex items-center gap-1">
                     <RadioGroupItem value="credito" id="credito" />
-                    <Label htmlFor="credito">Credito</Label>
+                    <Label
+                      htmlFor="credito"
+                      className="text-sm font-normal text-gray-400"
+                    >
+                      Credito
+                    </Label>
                   </div>
                 </RadioGroup>
               )}
@@ -316,7 +333,9 @@ export default function TypePlan() {
         <div className="flex justify-between">
           <Button
             type="button"
-            className={cn('bg-red-500')}
+            className={cn(
+              'text-background bg-red-500 transition-all duration-200 hover:bg-red-600',
+            )}
             onClick={() => {
               reset({
                 typePlanName: '',
@@ -330,8 +349,7 @@ export default function TypePlan() {
 
           <Button
             className={cn(
-              'text-background bg-green-500 shadow-[0_0_4px]',
-              'w-fit hover:bg-green-600',
+              'text-background w-fit bg-green-500 transition-all duration-200 hover:bg-green-600',
             )}
           >
             {editingItem ? 'Atualizar' : 'Adicionar'}

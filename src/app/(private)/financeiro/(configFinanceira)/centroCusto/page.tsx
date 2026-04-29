@@ -233,11 +233,14 @@ export default function CostCenter() {
           'flex flex-col gap-2 rounded-sm p-2 shadow-[0_0_2px] shadow-gray-400',
         )}
       >
-        <p className="text-sm text-blue-900 underline">
+        <p className="text-sm font-medium text-blue-900">
           Adicionar novo centro de custo
         </p>
         <div className="flex w-full flex-col gap-1">
-          <Label htmlFor="costCenter" className="text-sm text-gray-400">
+          <Label
+            htmlFor="costCenter"
+            className="text-sm font-normal text-gray-400"
+          >
             Selecione o centro de custo
           </Label>
           <Input
@@ -263,7 +266,9 @@ export default function CostCenter() {
         <div className="flex justify-between">
           <Button
             type="button"
-            className={cn('bg-red-500')}
+            className={cn(
+              'text-background bg-red-500 transition-all duration-200 hover:bg-red-600',
+            )}
             onClick={() => {
               reset({
                 costCenterName: '',
@@ -276,8 +281,7 @@ export default function CostCenter() {
 
           <Button
             className={cn(
-              'text-background bg-green-500 shadow-[0_0_4px]',
-              'w-fit hover:bg-green-600',
+              'text-background w-fit bg-green-500 transition-all duration-200 hover:bg-green-600',
             )}
           >
             {editingItem ? 'Atualizar' : 'Adicionar'}
