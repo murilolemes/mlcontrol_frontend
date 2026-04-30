@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { api } from "@/services/api";
-import { useRouter } from "next/navigation";
+import { api } from '@/services/api';
 import {
   createContext,
   ReactNode,
   useContext,
   useEffect,
   useState,
-} from "react";
-import { toast } from "react-toastify";
+} from 'react';
+import { toast } from 'react-toastify';
 
 type User = {
   sub: string;
   name: string;
+  companyId: string;
 };
 
 type AuthContextType = {
@@ -26,16 +26,16 @@ const AuthContext = createContext({} as AuthContextType);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  // const router = useRouter();
 
   useEffect(() => {
     async function loadUser() {
       try {
-        const response = await api.get("/auth/me");
+        const response = await api.get('/auth/me');
         setUser(response.data.user);
       } catch {
         setUser(null);
-        toast.error('Usuário não autenticado!')
+        toast.error('Usuário não autenticado!');
       } finally {
         setLoading(false);
       }
