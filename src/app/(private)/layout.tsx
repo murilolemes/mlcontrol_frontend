@@ -4,6 +4,7 @@ import Header from '@/components/header';
 import SideBar from '@/components/sideBar';
 
 import { AuthProvider } from '@/context/authContext';
+import { ClientProvider } from '@/context/clientContext';
 import { MenuProvider } from '@/context/menuContext';
 import { ProviderPrivate } from './providerPrivate';
 
@@ -15,15 +16,17 @@ export default function PrivateLayout({
   return (
     <AuthProvider>
       <MenuProvider>
-        <ProviderPrivate>
-          <div className="flex h-screen">
-            <SideBar />
-            <div className="h-full w-full">
-              <Header />
-              <div className="h-[calc(100vh-72px)] p-2">{children}</div>
+        <ClientProvider>
+          <ProviderPrivate>
+            <div className="flex h-screen">
+              <SideBar />
+              <div className="h-full w-full">
+                <Header />
+                <div className="h-[calc(100vh-72px)] p-2">{children}</div>
+              </div>
             </div>
-          </div>
-        </ProviderPrivate>
+          </ProviderPrivate>
+        </ClientProvider>
       </MenuProvider>
     </AuthProvider>
   );
