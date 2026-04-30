@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useAuth } from "@/context/authContext";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useAuth } from '@/context/authContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export function ProviderPrivate({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -10,15 +10,11 @@ export function ProviderPrivate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) {
-      router.replace("/login");
+      router.replace('/login');
     }
   }, [user, router]);
 
   if (!user) return null; // 🔥 evita renderizar conteúdo protegido
 
-  return (
-    <>
-      {children}
-    </>
-  )
+  return <>{children}</>;
 }
