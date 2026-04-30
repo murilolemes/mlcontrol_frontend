@@ -209,7 +209,7 @@ export default function CostCenter() {
 
       toast.success('Centro de custo excluido com sucesso!');
     } catch (err) {
-      toast.success('Falha ao excluir o centro de custo!');
+      toast.error('Falha ao excluir o centro de custo!');
     }
   }
 
