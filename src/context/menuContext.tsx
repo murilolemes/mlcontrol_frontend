@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   CurrencyDollarIcon,
@@ -8,80 +8,76 @@ import {
   TrendDownIcon,
   TrendUpIcon,
   UserCirclePlusIcon,
-  UsersThreeIcon
-} from "@phosphor-icons/react";
+  UsersThreeIcon,
+} from '@phosphor-icons/react';
 
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useState
-} from "react";
+import { createContext, ReactNode, useContext, useState } from 'react';
 
 type MenuContextType = {
   openMenu: boolean;
   setOpenMenu: (menu: boolean) => void;
   menuItems: typeof menuItems;
-}
+};
 
 const menuItems = [
   {
-    name: "Dashboard",
+    name: 'Dashboard',
     icon: <HouseIcon size={16} weight="fill" />,
-    path: "/dashboard",
+    path: '/dashboard',
   },
   {
-    name: "Clientes",
+    name: 'Clientes',
     icon: <UsersThreeIcon size={16} weight="fill" />,
-    path: "",
+    path: '',
     children: [
       {
-        name: "Lista de Clientes",
+        name: 'Lista de Clientes',
         icon: <UsersThreeIcon size={16} weight="regular" />,
-        path: "/clientes",
-      }, {
-        name: "Cadastro de Clientes",
+        path: '/clientes/lista',
+      },
+      {
+        name: 'Cadastro de Clientes',
         icon: <UserCirclePlusIcon size={16} weight="regular" />,
-        path: "",
+        path: '/clientes/cadastro',
       },
-    ]
-  },
-  {
-    name: "Financeiro",
-    icon: <CurrencyDollarIcon size={16} weight="fill" />,
-    path: "",
-    children: [
-      {
-        name: "Contas à Receber",
-        icon: <TrendUpIcon size={16} weight="regular" />,
-        path: "/financeiro/contasReceber",
-      },
-      {
-        name: "Contas à Pagar",
-        icon: <TrendDownIcon size={16} weight="regular" />,
-        path: "/financeiro/contasPagar",
-      }
     ],
   },
   {
-    name: "Config. Financeira",
-    icon: <GearIcon size={16} weight="fill" />,
-    path: "",
+    name: 'Financeiro',
+    icon: <CurrencyDollarIcon size={16} weight="fill" />,
+    path: '',
     children: [
       {
-        name: "Centro de Custo",
+        name: 'Contas à Receber',
         icon: <TrendUpIcon size={16} weight="regular" />,
-        path: "/financeiro/centroCusto",
+        path: '/financeiro/contasReceber',
       },
       {
-        name: "Tipo de Plano",
+        name: 'Contas à Pagar',
         icon: <TrendDownIcon size={16} weight="regular" />,
-        path: "/financeiro/tipoPlano",
+        path: '/financeiro/contasPagar',
+      },
+    ],
+  },
+  {
+    name: 'Config. Financeira',
+    icon: <GearIcon size={16} weight="fill" />,
+    path: '',
+    children: [
+      {
+        name: 'Centro de Custo',
+        icon: <TrendUpIcon size={16} weight="regular" />,
+        path: '/financeiro/centroCusto',
       },
       {
-        name: "Plano de Conta",
+        name: 'Tipo de Plano',
+        icon: <TrendDownIcon size={16} weight="regular" />,
+        path: '/financeiro/tipoPlano',
+      },
+      {
+        name: 'Plano de Conta',
         icon: <InvoiceIcon size={16} weight="regular" />,
-        path: "/financeiro/planoContas",
+        path: '/financeiro/planoContas',
       },
     ],
   },
@@ -93,11 +89,13 @@ export function MenuProvider({ children }: { children: ReactNode }) {
   const [openMenu, setOpenMenu] = useState(false);
 
   return (
-    <MenuContext.Provider value={{
-      openMenu,
-      setOpenMenu,
-      menuItems,
-    }}>
+    <MenuContext.Provider
+      value={{
+        openMenu,
+        setOpenMenu,
+        menuItems,
+      }}
+    >
       {children}
     </MenuContext.Provider>
   );
