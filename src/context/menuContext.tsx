@@ -1,15 +1,15 @@
 'use client';
 
 import {
-  CurrencyDollarIcon,
-  GearIcon,
-  HouseIcon,
-  InvoiceIcon,
-  TrendDownIcon,
-  TrendUpIcon,
-  UserCirclePlusIcon,
-  UsersThreeIcon,
-} from '@phosphor-icons/react';
+  DollarSign,
+  FileUser,
+  House,
+  Settings,
+  TrendingDown,
+  TrendingUp,
+  UserRoundPlus,
+  UsersRound,
+} from 'lucide-react';
 
 import { createContext, ReactNode, useContext, useState } from 'react';
 
@@ -22,61 +22,61 @@ type MenuContextType = {
 const menuItems = [
   {
     name: 'Dashboard',
-    icon: <HouseIcon size={16} weight="fill" />,
+    icon: <House size={16} strokeWidth={3} />,
     path: '/dashboard',
   },
   {
     name: 'Clientes',
-    icon: <UsersThreeIcon size={16} weight="fill" />,
+    icon: <UsersRound size={16} strokeWidth={3} />,
     path: '',
     children: [
       {
         name: 'Lista de Clientes',
-        icon: <UsersThreeIcon size={16} weight="regular" />,
+        icon: <FileUser size={16} strokeWidth={2} />,
         path: '/clientes/lista',
       },
       {
         name: 'Cadastro de Clientes',
-        icon: <UserCirclePlusIcon size={16} weight="regular" />,
+        icon: <UserRoundPlus size={16} strokeWidth={2} />,
         path: '/clientes/cadastro',
       },
     ],
   },
   {
     name: 'Financeiro',
-    icon: <CurrencyDollarIcon size={16} weight="fill" />,
+    icon: <DollarSign size={16} strokeWidth={3} />,
     path: '',
     children: [
       {
         name: 'Contas à Receber',
-        icon: <TrendUpIcon size={16} weight="regular" />,
+        icon: <TrendingUp size={16} strokeWidth={2} />,
         path: '/financeiro/contasReceber',
       },
       {
         name: 'Contas à Pagar',
-        icon: <TrendDownIcon size={16} weight="regular" />,
+        icon: <TrendingDown size={16} strokeWidth={2} />,
         path: '/financeiro/contasPagar',
       },
     ],
   },
   {
     name: 'Config. Financeira',
-    icon: <GearIcon size={16} weight="fill" />,
+    icon: <Settings size={16} strokeWidth={3} />,
     path: '',
     children: [
       {
         name: 'Centro de Custo',
-        icon: <TrendUpIcon size={16} weight="regular" />,
+        icon: <Settings size={16} strokeWidth={2} />,
         path: '/financeiro/centroCusto',
       },
       {
         name: 'Tipo de Plano',
-        icon: <TrendDownIcon size={16} weight="regular" />,
+        icon: <Settings size={16} strokeWidth={2} />,
         path: '/financeiro/tipoPlano',
       },
       {
         name: 'Plano de Conta',
-        icon: <InvoiceIcon size={16} weight="regular" />,
+        icon: <Settings size={16} strokeWidth={2} />,
         path: '/financeiro/planoContas',
       },
     ],

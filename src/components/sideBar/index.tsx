@@ -1,45 +1,60 @@
-"use client";
+'use client';
 
-import { useMenu } from "@/context/menuContext";
-import { useState } from "react";
-import SideBarButtons from "./sideBarButtons";
+import { useMenu } from '@/context/menuContext';
+import { cn } from '@/lib/utils';
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
+import SideBarButtons from './sideBarButtons';
 
 export default function SideBar() {
-  const { openMenu, menuItems } = useMenu();
+  const { openMenu, menuItems, setOpenMenu } = useMenu();
 
   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
   const [isHovering, setIsHovering] = useState(false);
 
-  const width =
-    openMenu && !isHovering ? "w-16" : "min-w-fit";
+  const isOpen = openMenu ? 'w-fit' : 'w-full max-w-56';
+  const isHover = isHovering && 'w-full max-w-56';
 
   return (
+    // MENU
     <aside
-      className={`${width} border-r border-blue-900/30 overflow-hidden transition-all duration-300 `}
+      className={cn(
+        `${isOpen} ${isHover} border-foreground/10 overflow-hidden`,
+        'flex transition-all duration-300',
+      )}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <header className="w-full h-18 p-2 border-b border-blue-900/30 flex items-center justify-center">
-        <img
-          src="/assets/logo-mlControl.svg"
-          alt="Logo mlControl"
-          className="w-full h-full"
-        />
-      </header>
+      <div className="w-full max-w-56 p-2">
+        {/* BOTÃO MENU */}
+        <div
+          className={cn(
+            `flex items-center ${openMenu ? 'justify-start' : 'justify-end'}`,
+          )}
+        >
+          <button
+            onClick={() => setOpenMenu(!openMenu)}
+            className={cn(
+              'text-foreground/50 hover:text-foreground/70 flex items-center justify-center',
+              'bg-background shadow-foreground/50 mb-2 rounded-sm p-1.5 shadow-[0_0_2px]',
+              'hover:shadow-foreground/70',
+            )}
+          >
+            {openMenu ? (
+              <Menu size={16} strokeWidth={2} />
+            ) : (
+              <X size={16} strokeWidth={2} />
+            )}
+          </button>
+        </div>
 
-      <div className="w-full p-2">
+        {/* MENU ITENS */}
         {menuItems.map((item) => (
           <div
             key={item.name}
-            className="
-              bg-white 
-              shadow-[0_0_4px] 
-              shadow-blue-900 
-              rounded-md 
-              flex 
-              flex-col 
-              mb-2 
-              overflow-hidden"
+            className={cn(
+              'shadow-foreground/50 mb-2 flex w-full max-w-56 flex-col overflow-hidden rounded-sm shadow-[0_0_2px]',
+            )}
           >
             <SideBarButtons
               {...item}
@@ -54,57 +69,3 @@ export default function SideBar() {
     </aside>
   );
 }
-
-
-
-
-
-
-// "use client";
-
-// import { useMenu } from "@/context/menuContext";
-// import { useState } from "react";
-// import SideBarButtons from "./sideBarButtons";
-
-// import {
-//   SideBarContainer,
-//   SideBarContent,
-//   SideBarHeader,
-//   SideBarItem
-// } from "./styles";
-
-// export default function SideBar() {
-//   const { openMenu, menuItems } = useMenu();
-
-//   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
-//   const [isHovering, setIsHovering] = useState(false);
-
-//   return (
-//     <SideBarContainer
-//       $openMenu={openMenu}
-//       $isHovering={isHovering}
-//       onMouseEnter={() => setIsHovering(true)}
-//       onMouseLeave={() => setIsHovering(false)}
-//     >
-//       <SideBarHeader>
-//         <img
-//           src="/assets/logo-mlControl.svg"
-//           alt="Logo mlControl"
-//         />
-//       </SideBarHeader>
-//       <SideBarContent>
-//         {menuItems.map((item) => (
-//           <SideBarItem key={item.name}>
-//             <SideBarButtons
-//               {...item}
-//               openSubMenu={openSubMenu}
-//               setOpenSubMenu={setOpenSubMenu}
-//               isCollapsed={openMenu}
-//               isHovering={isHovering}
-//             />
-//           </SideBarItem>
-//         ))}
-//       </SideBarContent>
-//     </SideBarContainer>
-//   )
-// }

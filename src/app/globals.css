@@ -1,6 +1,6 @@
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "tailwindcss";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import 'tailwindcss';
 
 @custom-variant dark (&:is(.dark *));
 @tailwind utilities;
@@ -142,9 +142,6 @@
 
   body {
     font-family: var(--font-montserrat), sans-serif;
-    color: var(--color-input);
-    background: var(--color-background);
-
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
