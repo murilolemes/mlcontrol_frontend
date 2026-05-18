@@ -5,6 +5,7 @@ import SideBar from '@/components/sideBar';
 
 import { AuthProvider } from '@/context/authContext';
 import { ClientProvider } from '@/context/clientContext';
+import { ConsultCnpjProvider } from '@/context/consultCnpj';
 import { MenuProvider } from '@/context/menuContext';
 import { cn } from '@/lib/utils';
 import { ProviderPrivate } from './providerPrivate';
@@ -28,7 +29,7 @@ export default function PrivateLayout({
                     'bg-background border-foreground/10 h-[calc(100vh-72px)] flex-1 rounded-tl-md border-t-2 border-l-2 p-2',
                   )}
                 >
-                  {children}
+                  <ConsultCnpjProvider>{children}</ConsultCnpjProvider>
                 </div>
               </div>
             </div>
