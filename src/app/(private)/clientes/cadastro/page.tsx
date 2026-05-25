@@ -36,7 +36,7 @@ import { validateCnpj } from '@/utils/validateCnpj';
 import { validateCpf } from '@/utils/validateCpf';
 import { useMask } from '@react-input/mask';
 import { Check, PlusIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState, type ChangeEvent } from 'react';
 
 const clientFormSchema = z
   .object({
@@ -98,30 +98,139 @@ const clientFormSchema = z
 
 export type ClientFormSchema = z.infer<typeof clientFormSchema>;
 
+const initialFormValues: ClientFormSchema = {
+  name: '',
+  fantasyName: '',
+  type: 'PF',
+  cpfCnpj: '',
+  stateRegistration: '',
+  email: '',
+  phone: '',
+  observation: '',
+  birthDate: '',
+  age: '',
+  clinicalDiagnosis: '',
+  gender: 'S',
+  occupation: '',
+  address: '',
+  number: '',
+  neighborhood: '',
+  complement: '',
+  cep: '',
+  city: '',
+  state: '',
+  uf: '',
+  emergencyContact: '',
+  emergencyContactName: '',
+  rg: '',
+  ie: '',
+};
+
+type MaskedInputProps = {
+  id: string;
+  mask: string;
+  placeholder: string;
+  value?: string;
+  name: string;
+  className?: string;
+  onBlur: () => void;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+};
+
+function MaskedInput({
+  id,
+  mask,
+  placeholder,
+  value,
+  name,
+  className,
+  onBlur,
+  onChange,
+}: MaskedInputProps) {
+  const inputRef = useMask({
+    mask,
+    replacement: { _: /\d/ },
+  });
+
+  return (
+    <Input
+      id={id}
+      placeholder={placeholder}
+      ref={inputRef}
+      value={value || ''}
+      onChange={onChange}
+      onBlur={onBlur}
+      name={name}
+      className={className}
+    />
+  );
+}
+
+function MaskedInputGroupInput({
+  id,
+  mask,
+  placeholder,
+  value,
+  name,
+  className,
+  onBlur,
+  onChange,
+}: MaskedInputProps) {
+  const inputRef = useMask({
+    mask,
+    replacement: { _: /\d/ },
+  });
+
+  return (
+    <InputGroupInput
+      id={id}
+      placeholder={placeholder}
+      ref={inputRef}
+      value={value || ''}
+      onChange={onChange}
+      onBlur={onBlur}
+      name={name}
+      className={className}
+    />
+  );
+}
+
 export default function CreateClient() {
-  const { consult, handleConsult } = useConsult();
+  const { handleConsult } = useConsult();
   const { createClient } = useClient();
   const [clientType, setClientType] = useState<'PF' | 'PJ'>('PF');
-  const [isValidCpfCnpj, setIsValidCpfCnpj] = useState<boolean | null>(null);
   const [cnpj, setCnpj] = useState<string>('');
   const [age, setAge] = useState<string | null>(null);
 
   const maskCpf = '___.___.___-__';
   const maskCnpj = '__.___.___/____-__';
+  const maskRg = '__.___.___-_';
+  const maskBirthDate = '__/__/____';
+  const maskIe = '___.___.___.___';
+  const maskPhone = '(__) _____-____';
+  const maskCep = '_____-___';
 
   const {
     register,
     handleSubmit,
     reset,
     control,
+    setValue,
     formState: { errors },
   } = useForm<ClientFormSchema>({
     resolver: zodResolver(clientFormSchema),
-    defaultValues: {
-      type: clientType,
-      cpfCnpj: '',
-    },
+    defaultValues: initialFormValues,
   });
+
+  function handleResetForm(type: 'PF' | 'PJ' = 'PF') {
+    reset({
+      ...initialFormValues,
+      type,
+    });
+    setClientType(type);
+    setCnpj('');
+    setAge(null);
+  }
 
   async function onSubmit(data: ClientFormSchema) {
     try {
@@ -139,18 +248,7 @@ export default function CreateClient() {
         observation: data.observation?.trim() || undefined,
       });
 
-      reset({
-        name: '',
-        fantasyName: '',
-        type: clientType,
-        cpfCnpj: '',
-        stateRegistration: '',
-        email: '',
-        phone: '',
-        observation: '',
-      });
-      setIsValidCpfCnpj(false);
-      setCnpj('');
+      handleResetForm();
     } catch {}
   }
 
@@ -197,6 +295,7 @@ export default function CreateClient() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
+        onReset={() => handleResetForm()}
         className={cn(
           'flex h-full w-full flex-col items-center justify-between',
         )}
@@ -218,6 +317,8 @@ export default function CreateClient() {
                       onValueChange={(value: 'PF' | 'PJ') => {
                         field.onChange(value);
                         setClientType(value);
+                        setValue('cpfCnpj', '');
+                        setCnpj('');
                       }}
                       value={field.value}
                       className="flex h-full justify-around gap-8"
@@ -264,31 +365,23 @@ export default function CreateClient() {
                       name="cpfCnpj"
                       control={control}
                       render={({ field }) => {
-                        const inputRef = useMask({
-                          mask: clientType === 'PF' ? maskCpf : maskCnpj,
-                          replacement: { _: /\d/ },
-                        });
-                        useEffect(() => {
-                          setIsValidCpfCnpj(
-                            field.value
-                              ? clientType === 'PF'
-                                ? validateCpf(field.value)
-                                : validateCnpj(field.value)
-                              : false,
-                          );
+                        const isValidCpfCnpj = field.value
+                          ? clientType === 'PF'
+                            ? validateCpf(field.value)
+                            : validateCnpj(field.value)
+                          : false;
 
-                          if (field.value) {
-                            setCnpj(field.value);
-                          }
-                        }, [field.value, clientType]);
                         return (
                           <InputGroup>
-                            <InputGroupInput
+                            <MaskedInputGroupInput
                               id="cpfCnpj"
+                              mask={clientType === 'PF' ? maskCpf : maskCnpj}
                               placeholder={`Digite seu ${clientType === 'PF' ? 'CPF' : 'CNPJ'}`}
-                              ref={inputRef}
                               value={field.value || ''}
-                              onChange={field.onChange}
+                              onChange={(event) => {
+                                field.onChange(event);
+                                setCnpj(event.target.value);
+                              }}
                               onBlur={field.onBlur}
                               name={field.name}
                               className="w-67"
@@ -305,10 +398,10 @@ export default function CreateClient() {
                   </div>
 
                   {errors.cpfCnpj && (
-                    <small className="text-sm text-red-400">
-                      {errors.cpfCnpj.message}
-                    </small>
-                  )}
+                  <small className="text-sm text-red-400">
+                    {errors.cpfCnpj.message}
+                  </small>
+                )}
                 </div>
               </div>
               {/* BOTÃO DE CONSULTA */}
@@ -359,15 +452,11 @@ export default function CreateClient() {
                   name="rg"
                   control={control}
                   render={({ field }) => {
-                    const inputRef = useMask({
-                      mask: '__.___.___._',
-                      replacement: { _: /\d/ },
-                    });
                     return (
-                      <Input
+                      <MaskedInput
                         id="rg"
+                        mask={maskRg}
                         placeholder="Digite seu RG"
-                        ref={inputRef}
                         value={field.value || ''}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
@@ -416,20 +505,16 @@ export default function CreateClient() {
                 name="birthDate"
                 control={control}
                 render={({ field }) => {
-                  const inputRef = useMask({
-                    mask: '__/__/____',
-                    replacement: { _: /\d/ },
-                  });
                   return (
-                    <Input
+                    <MaskedInput
                       id="birthDate"
+                      mask={maskBirthDate}
                       placeholder="Digite a data"
-                      ref={inputRef}
                       value={field.value || ''}
                       onChange={field.onChange}
                       onBlur={() => {
                         handleAgeCalculation(field.value || '');
-                        field.onBlur;
+                        field.onBlur();
                       }}
                       name={field.name}
                     />
@@ -481,15 +566,11 @@ export default function CreateClient() {
                   name="stateRegistration"
                   control={control}
                   render={({ field }) => {
-                    const inputRef = useMask({
-                      mask: '___.___.___.___',
-                      replacement: { _: /\d/ },
-                    });
                     return (
-                      <Input
+                      <MaskedInput
                         id="stateRegistration"
+                        mask={maskIe}
                         placeholder="Digite sua inscrição estadual"
-                        ref={inputRef}
                         value={field.value || ''}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
@@ -549,15 +630,11 @@ export default function CreateClient() {
                   name="phone"
                   control={control}
                   render={({ field }) => {
-                    const inputRef = useMask({
-                      mask: '(__) _____-____',
-                      replacement: { _: /\d/ },
-                    });
                     return (
-                      <Input
+                      <MaskedInput
                         id="phone"
+                        mask={maskPhone}
                         placeholder="Digite seu telefone"
-                        ref={inputRef}
                         value={field.value || ''}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
@@ -610,17 +687,26 @@ export default function CreateClient() {
                 <Label htmlFor="gender" className="text-foreground/60">
                   Sexo
                 </Label>
-                <Select defaultValue="S">
-                  <SelectTrigger id="form-country" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="S">Selecione</SelectItem>
-                    <SelectItem value="M">Masculino</SelectItem>
-                    <SelectItem value="F">Feminino</SelectItem>
-                    <SelectItem value="O">Outros</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="gender"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      value={field.value || 'S'}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger id="gender" className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="S">Selecione</SelectItem>
+                        <SelectItem value="M">Masculino</SelectItem>
+                        <SelectItem value="F">Feminino</SelectItem>
+                        <SelectItem value="O">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
             </div>
           )}
@@ -636,15 +722,11 @@ export default function CreateClient() {
                 name="cep"
                 control={control}
                 render={({ field }) => {
-                  const inputRef = useMask({
-                    mask: '_____-___',
-                    replacement: { _: /\d/ },
-                  });
                   return (
-                    <Input
+                    <MaskedInput
                       id="cep"
+                      mask={maskCep}
                       placeholder="Digite o CEP"
-                      ref={inputRef}
                       value={field.value || ''}
                       onChange={field.onChange}
                       onBlur={field.onBlur}
