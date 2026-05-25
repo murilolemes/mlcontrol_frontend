@@ -55,7 +55,7 @@ function SelectTrigger({
         'dark:bg-input/30 dark:hover:bg-input/50 *:data-[slot=select-value]:gap-1.5',
         'dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        'shadow-foreground text-blue-900 shadow-[0_0_2px]',
+        'text-blue-900',
         className,
       )}
       {...props}
@@ -87,7 +87,7 @@ function SelectContent({
           'data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
           'relative z-50 max-h-(--radix-select-content-available-height) min-w-36',
           'origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto',
-          'rounded-lg shadow-md ring-1 duration-100 data-[align-trigger=true]:animate-none',
+          'rounded-lg ring-1 duration-100 data-[align-trigger=true]:animate-none',
           position === 'popper' &&
             'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1',
           'data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
