@@ -9,7 +9,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group';
 import {
   Pagination,
   PaginationContent,
@@ -89,26 +93,19 @@ export default function ClientList() {
 
       <div className="rounded-sm shadow-[0_0_2px] shadow-gray-400">
         <div className="flex items-center gap-2 p-2">
-          <div
-            className={cn(
-              'flex items-center gap-1 rounded-xl border-2 md:w-1/2 lg:w-1/4',
-              'border-gray-300 pl-1 text-gray-400',
-            )}
-          >
-            <Search size={16} />
-            <Input
+          <InputGroup className={cn('w-90')}>
+            <InputGroupInput
               placeholder="Pesquisar"
-              className={cn(
-                'focus-visible:border=none border-none px-1 py-1',
-                'shadow-none focus-visible:shadow-none',
-              )}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
             />
-          </div>
+            <InputGroupAddon>
+              <Search size={16} />
+            </InputGroupAddon>
+          </InputGroup>
         </div>
 
         <Table>
@@ -117,20 +114,10 @@ export default function ClientList() {
               <TableHead className="font-bold text-blue-900">Nome</TableHead>
 
               <TableHead className="font-bold text-blue-900">
-                Nome Fantasia
-              </TableHead>
-
-              <TableHead className="font-bold text-blue-900">
                 CPF/CNPJ
               </TableHead>
 
               <TableHead className="font-bold text-blue-900">Tipo</TableHead>
-
-              <TableHead className="font-bold text-blue-900">
-                Telefone
-              </TableHead>
-
-              <TableHead className="font-bold text-blue-900">E-mail</TableHead>
 
               <TableHead className="font-bold text-blue-900">
                 Observação
@@ -150,10 +137,6 @@ export default function ClientList() {
                 </TableCell>
 
                 <TableCell className="font-medium text-gray-500">
-                  {client.fantasyName || '-'}
-                </TableCell>
-
-                <TableCell className="font-medium text-gray-500">
                   {client.cpfCnpj
                     ? formatCpfCnpj(client.type, client.cpfCnpj)
                     : '-'}
@@ -161,15 +144,6 @@ export default function ClientList() {
 
                 <TableCell className="font-medium text-gray-500">
                   {client.type === 'PF' ? 'Pessoa Física' : 'Pessoa Jurídica'}
-                </TableCell>
-
-                <TableCell className="font-medium text-gray-500">
-                  {client.phone || '-'}
-                </TableCell>
-
-                <TableCell className="font-medium text-gray-500">
-                  {client.emails.map((email) => email.address).join(', ') ||
-                    '-'}
                 </TableCell>
 
                 <TableCell className="font-medium text-gray-500">
