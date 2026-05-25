@@ -154,7 +154,9 @@ export default function ClientList() {
                 </TableCell>
 
                 <TableCell className="font-medium text-gray-500">
-                  {formatCpfCnpj(client.type, client.cpfCnpj)}
+                  {client.cpfCnpj
+                    ? formatCpfCnpj(client.type, client.cpfCnpj)
+                    : '-'}
                 </TableCell>
 
                 <TableCell className="font-medium text-gray-500">
@@ -171,7 +173,7 @@ export default function ClientList() {
                 </TableCell>
 
                 <TableCell className="font-medium text-gray-500">
-                  {client.observation}
+                  {client.observation || '-'}
                 </TableCell>
 
                 <TableCell className="text-right">
