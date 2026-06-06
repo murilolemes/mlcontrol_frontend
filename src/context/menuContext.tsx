@@ -1,9 +1,11 @@
 'use client';
 
 import {
+  ClipboardEdit,
   DollarSign,
   FileUser,
   House,
+  HouseHeart,
   Settings,
   TrendingDown,
   TrendingUp,
@@ -56,6 +58,18 @@ const menuItems = [
         name: 'Contas à Pagar',
         icon: <TrendingDown size={16} strokeWidth={2} />,
         path: '/financeiro/contasPagar',
+      },
+    ],
+  },
+  {
+    name: 'Anamnese',
+    icon: <HouseHeart size={16} strokeWidth={3} />,
+    path: '',
+    children: [
+      {
+        name: 'Cadastro',
+        icon: <ClipboardEdit size={16} strokeWidth={2} />,
+        path: '/anamnese/cadastro',
       },
     ],
   },

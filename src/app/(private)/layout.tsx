@@ -26,7 +26,8 @@ export default function PrivateLayout({
                 <SideBar />
                 <div
                   className={cn(
-                    'bg-background border-foreground/10 h-[calc(100vh-72px)] flex-1 rounded-tl-md border-t-2 border-l-2 p-2',
+                    'bg-background border-foreground/10 h-[calc(100vh-72px)] flex-1',
+                    'rounded-tl-md border-t-2 border-l-2 p-2',
                   )}
                 >
                   <ConsultCnpjProvider>{children}</ConsultCnpjProvider>
