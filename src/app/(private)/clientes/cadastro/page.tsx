@@ -398,10 +398,10 @@ export default function CreateClient() {
                   </div>
 
                   {errors.cpfCnpj && (
-                  <small className="text-sm text-red-400">
-                    {errors.cpfCnpj.message}
-                  </small>
-                )}
+                    <small className="text-sm text-red-400">
+                      {errors.cpfCnpj.message}
+                    </small>
+                  )}
                 </div>
               </div>
               {/* BOTÃO DE CONSULTA */}
