@@ -1,5 +1,8 @@
+import lineClamp from '@tailwindcss/line-clamp';
+import scrollbarHide from 'tailwind-scrollbar-hide';
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -13,5 +16,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require('@tailwindcss/line-clamp')],
+  plugins: [lineClamp, scrollbarHide],
 };
