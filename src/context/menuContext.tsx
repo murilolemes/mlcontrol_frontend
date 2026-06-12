@@ -1,15 +1,10 @@
 'use client';
 
 import {
-  ClipboardEdit,
   DollarSign,
-  FileUser,
   House,
   HouseHeart,
   Settings,
-  TrendingDown,
-  TrendingUp,
-  UserRoundPlus,
   UsersRound,
 } from 'lucide-react';
 
@@ -23,75 +18,67 @@ type MenuContextType = {
 
 const menuItems = [
   {
-    name: 'Dashboard',
-    icon: <House size={16} strokeWidth={3} />,
-    path: '/dashboard',
+    title: 'Dashboard',
+    url: '/dashboard',
+    icon: House,
   },
   {
-    name: 'Clientes',
-    icon: <UsersRound size={16} strokeWidth={3} />,
-    path: '',
-    children: [
+    title: 'Clientes',
+    url: '',
+    icon: UsersRound,
+    items: [
       {
-        name: 'Lista de Clientes',
-        icon: <FileUser size={16} strokeWidth={2} />,
-        path: '/clientes/lista',
+        title: 'Lista de Clientes',
+        url: '/clientes/lista',
       },
       {
-        name: 'Cadastro de Clientes',
-        icon: <UserRoundPlus size={16} strokeWidth={2} />,
-        path: '/clientes/cadastro',
+        title: 'Cadastro de Clientes',
+        url: '/clientes/cadastro',
       },
     ],
   },
   {
-    name: 'Financeiro',
-    icon: <DollarSign size={16} strokeWidth={3} />,
-    path: '',
-    children: [
+    title: 'Financeiro',
+    url: '',
+    icon: DollarSign,
+    items: [
       {
-        name: 'Contas à Receber',
-        icon: <TrendingUp size={16} strokeWidth={2} />,
-        path: '/financeiro/contasReceber',
+        title: 'Contas à Receber',
+        url: '/financeiro/contasReceber',
       },
       {
-        name: 'Contas à Pagar',
-        icon: <TrendingDown size={16} strokeWidth={2} />,
-        path: '/financeiro/contasPagar',
+        title: 'Contas à Pagar',
+        url: '/financeiro/contasPagar',
       },
     ],
   },
   {
-    name: 'Anamnese',
-    icon: <HouseHeart size={16} strokeWidth={3} />,
-    path: '',
-    children: [
+    title: 'Anamnese',
+    url: '',
+    icon: HouseHeart,
+    items: [
       {
-        name: 'Cadastro',
-        icon: <ClipboardEdit size={16} strokeWidth={2} />,
-        path: '/anamnese/cadastro',
+        title: 'Cadastro',
+        url: '/anamnese/cadastro',
       },
     ],
   },
   {
-    name: 'Config. Financeira',
-    icon: <Settings size={16} strokeWidth={3} />,
-    path: '',
-    children: [
+    title: 'Config. Financeira',
+    url: '',
+    icon: Settings,
+    items: [
       {
-        name: 'Centro de Custo',
-        icon: <Settings size={16} strokeWidth={2} />,
-        path: '/financeiro/centroCusto',
+        title: 'Centro de Custo',
+        url: '/financeiro/centroCusto',
       },
       {
-        name: 'Tipo de Plano',
-        icon: <Settings size={16} strokeWidth={2} />,
-        path: '/financeiro/tipoPlano',
+        title: 'Tipo de Plano',
+        url: '/financeiro/tipoPlano',
       },
       {
-        name: 'Plano de Conta',
-        icon: <Settings size={16} strokeWidth={2} />,
-        path: '/financeiro/planoContas',
+        title: 'Plano de Conta',
+        url: '/financeiro/planoContas',
       },
     ],
   },

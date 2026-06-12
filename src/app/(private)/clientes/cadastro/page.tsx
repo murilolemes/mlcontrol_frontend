@@ -1,4 +1,5 @@
 'use client';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   addMonths,
@@ -12,6 +13,7 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -284,14 +286,15 @@ export default function CreateClient() {
   }
 
   return (
-    <div className={cn('flex h-full w-full flex-col gap-4')}>
+    <div className={cn('flex h-full w-full flex-col gap-4 p-2')}>
       {/* TITULO */}
-      <div className="flex items-start justify-between">
+      <TriggerSideBar title="Clientes" subTitle={['Cadastro']} />
+      {/* <div className="flex items-start justify-between">
         <h4 className="text-chart-2 font-bold">Cadastro de Clientes</h4>
         <p className="text-foreground/60 text-xs">
           Data de Cadastro <span className="font-bold">21/05/2026</span>
         </p>
-      </div>
+      </div> */}
 
       <form
         onSubmit={handleSubmit(onSubmit)}

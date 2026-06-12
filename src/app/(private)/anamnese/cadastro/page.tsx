@@ -1,6 +1,6 @@
 'use client';
 
-import { SearchClient } from '@/components/clients/search';
+import { SearchClient } from '@/components/clients/search-client';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';

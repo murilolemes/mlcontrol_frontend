@@ -1,5 +1,6 @@
 'use client';
 
+import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -88,8 +89,9 @@ export default function ClientList() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-auto px-1">
-      <h4 className="font-bold text-blue-900">Lista de Clientes</h4>
+    <div className="flex h-full flex-col gap-4 overflow-auto p-2">
+      {/* <h4 className="font-bold text-blue-900">Lista de Clientes</h4> */}
+      <TriggerSideBar title="Clientes" subTitle={['Lista']} />
 
       <div className="rounded-sm shadow-[0_0_2px] shadow-gray-400">
         <div className="flex items-center gap-2 p-2">

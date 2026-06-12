@@ -1,11 +1,11 @@
 'use client';
 
+import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
+
 export default function Dashboard() {
   return (
-    <div className="p-2">
-      <div>
-        <h2>Dashboard</h2>
-      </div>
+    <div className="flex w-full">
+      <TriggerSideBar title="Dashboard" />
     </div>
   );
 }

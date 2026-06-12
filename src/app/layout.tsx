@@ -31,7 +31,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={cn('font-sans', geist.variable)}>
       <body
         className={cn(
-          'bg-background font-sans',
+          'bg-sidebar font-sans',
           geist.variable,
           montserrat.variable,
         )}

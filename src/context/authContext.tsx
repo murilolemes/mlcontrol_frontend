@@ -1,6 +1,7 @@
 'use client';
 
 import { api } from '@/services/api';
+import { getFileUrl } from '@/utils/getFileUrl';
 import {
   createContext,
   ReactNode,
@@ -13,6 +14,8 @@ import { toast } from 'react-toastify';
 type User = {
   sub: string;
   name: string;
+  email?: string;
+  avatar?: string;
   companyId: string;
 };
 
@@ -32,7 +35,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function loadUser() {
       try {
         const response = await api.get('/auth/me');
-        setUser(response.data.user);
+
+        const user = response.data.user;
+
+        setUser({
+          ...user,
+          avatar: user.avatar ? getFileUrl(user.avatar) : undefined,
+        });
       } catch {
         setUser(null);
         toast.error('Usuário não autenticado!');
