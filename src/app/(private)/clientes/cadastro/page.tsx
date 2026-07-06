@@ -286,15 +286,9 @@ export default function CreateClient() {
   }
 
   return (
-    <div className={cn('flex h-full w-full flex-col gap-4 p-2')}>
+    <div className={cn('flex h-full w-full flex-col gap-4')}>
       {/* TITULO */}
       <TriggerSideBar title="Clientes" subTitle={['Cadastro']} />
-      {/* <div className="flex items-start justify-between">
-        <h4 className="text-chart-2 font-bold">Cadastro de Clientes</h4>
-        <p className="text-foreground/60 text-xs">
-          Data de Cadastro <span className="font-bold">21/05/2026</span>
-        </p>
-      </div> */}
 
       <form
         onSubmit={handleSubmit(onSubmit)}

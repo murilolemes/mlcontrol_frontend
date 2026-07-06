@@ -89,8 +89,7 @@ export default function ClientList() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-auto p-2">
-      {/* <h4 className="font-bold text-blue-900">Lista de Clientes</h4> */}
+    <div className={cn('flex h-full w-full flex-col gap-4')}>
       <TriggerSideBar title="Clientes" subTitle={['Lista']} />
 
       <div className="rounded-sm shadow-[0_0_2px] shadow-gray-400">

@@ -1,5 +1,6 @@
 'use client';
 
+import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -224,8 +225,8 @@ export default function CostCenter() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-auto px-1">
-      <h4 className="font-bold text-blue-900">Centro de Custo</h4>
+    <div className={cn('flex h-full w-full flex-col gap-4')}>
+      <TriggerSideBar title="Configuração" subTitle={['Centro de custo']} />
 
       <form
         onSubmit={handleSubmit(onSubmit)}

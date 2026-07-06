@@ -1,10 +1,13 @@
 'use client';
 
+import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
+import { cn } from '@/lib/utils';
+
 export default function AccountsPayable() {
   return (
-    <div className="p-2">
+    <div className={cn('flex h-full w-full flex-col gap-4')}>
+      <TriggerSideBar title="Financeiro" subTitle={['Contas à pagar']} />
       <div>
-        <h2>Contas à pagar</h2>
         <div className="accountDescription"></div>
       </div>
     </div>

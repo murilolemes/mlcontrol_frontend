@@ -7,10 +7,17 @@ import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { api } from '@/services/api';
+import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 const loginFormSchema = z.object({
@@ -22,6 +29,7 @@ export type LoginFormSchema = z.infer<typeof loginFormSchema>;
 
 export default function Login() {
   const router = useRouter();
+  const [passwordView, setPasswordView] = useState(false);
 
   const {
     register,
@@ -49,7 +57,7 @@ export default function Login() {
   }
 
   return (
-    <main className="flex h-screen w-screen items-center justify-center">
+    <main className="flex h-screen w-screen items-center justify-center p-2">
       <div className="flex w-112.5 flex-col">
         <div className="mb-4 flex justify-center">
           <Image
@@ -85,13 +93,26 @@ export default function Login() {
               Senha
             </Label>
 
-            <Input
-              type="password"
-              id="password"
-              placeholder="Digite sua senha"
-              {...register('password')}
-              className="placeholder:text-ring text-blue-900"
-            />
+            <InputGroup>
+              <InputGroupInput
+                type={passwordView ? 'text' : 'password'}
+                id="password"
+                placeholder="Digite sua senha"
+                {...register('password')}
+                className="placeholder:text-ring text-blue-900"
+              />
+              <InputGroupAddon align="inline-end">
+                <Button
+                  type="button"
+                  onClick={() => setPasswordView(!passwordView)}
+                  className={cn(
+                    'bg-background text-foreground h-fit w-fit p-0',
+                  )}
+                >
+                  {passwordView ? <Eye size={16} /> : <EyeOff size={16} />}
+                </Button>
+              </InputGroupAddon>
+            </InputGroup>
 
             {errors.password && (
               <small className="text-sm text-red-400">
@@ -103,8 +124,8 @@ export default function Login() {
           <Button
             type="submit"
             className={cn(
-              'mt-2 bg-blue-900 font-bold shadow-[0_0_2px] shadow-blue-700',
-              'hover:bg-blue-800 hover:shadow-[0_0_4px]',
+              'border-ring bg-transparent font-bold text-blue-900 hover:bg-blue-900',
+              'hover:text-background shadow-[0_0_2px_1px_rgba(0,0,0,0.2)]',
             )}
           >
             Entrar

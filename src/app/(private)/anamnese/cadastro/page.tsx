@@ -1,6 +1,7 @@
 'use client';
 
 import { SearchClient } from '@/components/clients/search-client';
+import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
@@ -121,12 +122,13 @@ export default function CreateAnamnese() {
 
   return (
     <div className={cn('flex h-full w-full flex-col gap-4')}>
-      <div className="flex items-start justify-between">
+      <TriggerSideBar title="Anamnese" subTitle={['Cadastro']} />
+      {/* <div className="flex items-start justify-between">
         <h4 className="text-chart-2 font-bold">Cadastro de Anamnese</h4>
         <p className="text-foreground/60 text-xs">
           Data de Cadastro <span className="font-bold">21/05/2026</span>
         </p>
-      </div>
+      </div> */}
 
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -141,7 +143,7 @@ export default function CreateAnamnese() {
             <Label htmlFor="patientName" className="text-foreground/60">
               Nome do Paciente
             </Label>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <Input
                 id="patientName"
                 placeholder="Nome do paciente"
@@ -302,7 +304,7 @@ export default function CreateAnamnese() {
                 <Field
                   key={item.name}
                   orientation="horizontal"
-                  className="w-fit"
+                  className="hover:w-fit"
                 >
                   <Controller
                     name="pathologies"
@@ -329,7 +331,10 @@ export default function CreateAnamnese() {
                     )}
                   />
 
-                  <FieldLabel htmlFor={item.name} className="font-normal">
+                  <FieldLabel
+                    htmlFor={item.name}
+                    className="text-muted-foreground hover:text-foreground font-normal"
+                  >
                     {item.label}
                   </FieldLabel>
                 </Field>

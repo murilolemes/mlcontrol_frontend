@@ -1,5 +1,6 @@
 'use client';
 
+import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -246,8 +247,8 @@ export default function AccountPlan() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-auto px-1">
-      <h4 className="font-bold text-blue-900">Plano de contas</h4>
+    <div className={cn('flex h-full w-full flex-col gap-4')}>
+      <TriggerSideBar title="Configuração" subTitle={['Plano de contas']} />
 
       <form
         onSubmit={handleSubmit(onSubmit)}
