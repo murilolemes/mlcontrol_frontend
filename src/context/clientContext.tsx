@@ -1,6 +1,7 @@
 'use client';
 
 import { api } from '@/services/api';
+import { isAxiosError } from 'axios';
 import {
   createContext,
   ReactNode,
@@ -23,6 +24,7 @@ type Client = {
   type: 'PF' | 'PJ';
   cpfCnpj?: string;
   emails: Email[];
+  phones?: string[];
   phone?: string;
   stateRegistration?: string;
   observation?: string;
@@ -34,7 +36,9 @@ type CreateClientPayload = {
   type: 'PF' | 'PJ';
   cpfCnpj?: string;
   email?: string;
+  emails?: string[];
   phone?: string;
+  phones?: string[];
   stateRegistration?: string;
   observation?: string;
 };
@@ -51,21 +55,18 @@ const clientsInFlight = new Map<string, Promise<Client[]>>();
 export function ClientProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
+  const companyId = user?.companyId;
 
   useEffect(() => {
-    const companyId = user?.companyId;
-
     if (!companyId) {
-      setClients([]);
-      setLoading(false);
       return;
     }
 
     const cachedClients = clientsCache.get(companyId);
     if (cachedClients) {
-      setClients(cachedClients);
-      setLoading(false);
+      void Promise.resolve().then(() => {
+        setClients(cachedClients);
+      });
       return;
     }
 
@@ -78,9 +79,6 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         })
         .catch(() => {
           setClients([]);
-        })
-        .finally(() => {
-          setLoading(false);
         });
       return;
     }
@@ -105,11 +103,8 @@ export function ClientProvider({ children }: { children: ReactNode }) {
     request
       .then((responseClients) => {
         setClients(responseClients);
-      })
-      .finally(() => {
-        setLoading(false);
       });
-  }, [user?.companyId]);
+  }, [companyId]);
 
   async function createClient(client: CreateClientPayload) {
     try {
@@ -118,8 +113,21 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      const normalizedEmails = [
+        ...(client.emails ?? []),
+        ...(client.email ? [client.email] : []),
+      ].filter(Boolean);
+      const normalizedPhones = [
+        ...(client.phones ?? []),
+        ...(client.phone ? [client.phone] : []),
+      ].filter(Boolean);
+
       const response = await api.post('client', {
         ...client,
+        email: normalizedEmails[0],
+        emails: normalizedEmails,
+        phone: normalizedPhones[0],
+        phones: normalizedPhones,
         companyId: user.companyId,
       });
       const createdClient = response.data?.client;
@@ -128,9 +136,16 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         const cachedClients = clientsCache.get(user.companyId) ?? [];
         const nextClient = {
           ...createdClient,
-          emails: client.email
-            ? [{ id: `${createdClient.id}-email`, address: client.email }]
-            : (createdClient.emails ?? []),
+          emails: createdClient.emails?.length
+            ? createdClient.emails
+            : normalizedEmails.map((address, index) => ({
+                id: `${createdClient.id}-email-${index}`,
+                address,
+              })),
+          phones: createdClient.phones?.length
+            ? createdClient.phones
+            : normalizedPhones,
+          phone: createdClient.phone ?? normalizedPhones[0],
         };
 
         const nextClients = [
@@ -143,22 +158,18 @@ export function ClientProvider({ children }: { children: ReactNode }) {
       }
 
       toast.success('Cliente cadastrado com sucesso!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(error);
-      const message =
-        error?.response?.data?.message || 'Erro ao cadastrar cliente!';
+      const message = isAxiosError(error)
+        ? error.response?.data?.message || 'Erro ao cadastrar cliente!'
+        : 'Erro ao cadastrar cliente!';
       toast.error(Array.isArray(message) ? message.join(', ') : message);
       throw error;
     }
   }
 
-  // 🔥 BLOQUEIA renderização enquanto valida
-  if (loading) {
-    return <p>Carregando...</p>;
-  }
-
   return (
-    <ClientContext.Provider value={{ clients, createClient }}>
+    <ClientContext.Provider value={{ clients: companyId ? clients : [], createClient }}>
       {children}
     </ClientContext.Provider>
   );

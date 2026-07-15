@@ -44,8 +44,8 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        'border-input flex w-fit items-center justify-between gap-1.5 rounded-lg border-2',
-        'bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors',
+        'border-input flex w-fit items-center justify-between gap-1.5 rounded-lg border',
+        'bg-background py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors',
         'focus-visible:border-ring outline-none select-none focus-visible:ring-1',
         'focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
         'aria-invalid:border-destructive aria-invalid:ring-destructive/20 aria-invalid:ring-3',
@@ -55,14 +55,14 @@ function SelectTrigger({
         'dark:bg-input/30 dark:hover:bg-input/50 *:data-[slot=select-value]:gap-1.5',
         'dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        'text-blue-900',
+        'text-foreground',
         className,
       )}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="pointer-events-none size-4 text-blue-900" />
+        <ChevronDownIcon className="text-foreground pointer-events-none size-4" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );
@@ -81,7 +81,7 @@ function SelectContent({
         data-slot="select-content"
         data-align-trigger={position === 'item-aligned'}
         className={cn(
-          'bg-popover ring-foreground/10 data-[side=bottom]:slide-in-from-top-2 text-blue-500',
+          'bg-popover ring-foreground/10 data-[side=bottom]:slide-in-from-top-2 text-foreground/70',
           'data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2',
           'data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0',
           'data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
@@ -136,7 +136,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        'focus:bg-accent focus:text-blue-300 not-data-[variant=destructive]:focus:**:text-blue-300',
+        'focus:bg-accent focus:text-foreground not-data-[variant=destructive]:focus:**:text-foreground',
         'relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5',
         'text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex",

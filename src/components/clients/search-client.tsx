@@ -98,7 +98,7 @@ export function SearchClient({ setClient }: SearchClientProps) {
         <Button
           type="button"
           className={cn(
-            'bg-background h-full border-2 border-blue-600 px-2 py-1.5 font-bold text-blue-600',
+            'bg-background w-full border-2 border-blue-600 px-2 py-1.5 font-bold text-blue-600 md:h-full md:w-fit',
             'hover:enabled:text-background text-xs transition-all duration-200 hover:enabled:bg-blue-600',
           )}
           onClick={() => setSearch('')}

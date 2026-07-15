@@ -1,8 +1,8 @@
 'use client';
 
 import { SearchClient } from '@/components/clients/search-client';
+import { ButtonRegister } from '@/components/forms/button-register';
 import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -121,34 +121,28 @@ export default function CreateAnamnese() {
   }
 
   return (
-    <div className={cn('flex h-full w-full flex-col gap-4')}>
+    <div className={cn('flex w-full flex-col gap-4')}>
       <TriggerSideBar title="Anamnese" subTitle={['Cadastro']} />
-      {/* <div className="flex items-start justify-between">
-        <h4 className="text-chart-2 font-bold">Cadastro de Anamnese</h4>
-        <p className="text-foreground/60 text-xs">
-          Data de Cadastro <span className="font-bold">21/05/2026</span>
-        </p>
-      </div> */}
 
       <form
         onSubmit={handleSubmit(onSubmit)}
         onReset={handleResetForm}
         className={cn(
-          'flex w-full flex-col items-center justify-between',
+          'flex h-full w-full flex-col items-center justify-between gap-4',
           'no-scrollbar h-full overflow-y-auto p-1',
         )}
       >
-        <div className={cn('flex w-full flex-col gap-4')}>
-          <div className="flex flex-col gap-2">
+        <div className={cn('flex w-full flex-col gap-2')}>
+          <div className="flex flex-col gap-0.5">
             <Label htmlFor="patientName" className="text-foreground/60">
               Nome do Paciente
             </Label>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-center gap-2 md:flex-row">
               <Input
                 id="patientName"
                 placeholder="Nome do paciente"
                 readOnly
-                className="bg-foreground/10"
+                className="bg-input/30"
                 {...register('patientName')}
               />
               <SearchClient setClient={setClient} />
@@ -160,8 +154,8 @@ export default function CreateAnamnese() {
             )}
           </div>
 
-          <div className={cn('flex gap-4')}>
-            <div className="flex flex-1 flex-col gap-2">
+          <div className={cn('flex flex-col gap-2 md:flex-row')}>
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label
                 htmlFor="emergencyContactName"
                 className="text-foreground/60"
@@ -176,7 +170,7 @@ export default function CreateAnamnese() {
               />
             </div>
 
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="emergencyContact" className="text-foreground/60">
                 Contato de Emergência
               </Label>
@@ -189,8 +183,8 @@ export default function CreateAnamnese() {
             </div>
           </div>
 
-          <div className={cn('flex gap-4')}>
-            <div className="flex flex-1 flex-col gap-2">
+          <div className={cn('flex flex-col gap-2 md:flex-row')}>
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="clinicalDiagnosis" className="text-foreground/60">
                 Diagnóstico Clínico
               </Label>
@@ -202,7 +196,7 @@ export default function CreateAnamnese() {
               />
             </div>
 
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="mainComplaint" className="text-foreground/60">
                 Queixa Principal
               </Label>
@@ -215,8 +209,8 @@ export default function CreateAnamnese() {
             </div>
           </div>
 
-          <div className={cn('flex gap-4')}>
-            <div className="flex flex-1 flex-col gap-2">
+          <div className={cn('flex flex-col gap-2 md:flex-row')}>
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="pain" className="text-foreground/60">
                 Dor
               </Label>
@@ -228,7 +222,7 @@ export default function CreateAnamnese() {
               />
             </div>
 
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="surgery" className="text-foreground/60">
                 Cirurgia
               </Label>
@@ -241,8 +235,8 @@ export default function CreateAnamnese() {
             </div>
           </div>
 
-          <div className={cn('flex gap-4')}>
-            <div className="flex flex-1 flex-col gap-2">
+          <div className={cn('flex flex-col gap-2 md:flex-row')}>
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="medicines" className="text-foreground/60">
                 Medicamentos
               </Label>
@@ -254,7 +248,7 @@ export default function CreateAnamnese() {
               />
             </div>
 
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="physicalActivity" className="text-foreground/60">
                 Atividade Física
               </Label>
@@ -273,8 +267,8 @@ export default function CreateAnamnese() {
             </div>
           </div>
 
-          <div className={cn('flex gap-4')}>
-            <div className="flex flex-1 flex-col gap-2">
+          <div className={cn('flex flex-col gap-2 md:flex-row')}>
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="additionalInfo" className="text-foreground/60">
                 Informações Adicionais
               </Label>
@@ -286,7 +280,7 @@ export default function CreateAnamnese() {
               />
             </div>
 
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="observation" className="text-foreground/60">
                 Observação
               </Label>
@@ -299,7 +293,7 @@ export default function CreateAnamnese() {
             </div>
           </div>
           <FieldSet>
-            <FieldGroup className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <FieldGroup className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
               {conditions.map((item) => (
                 <Field
                   key={item.name}
@@ -349,27 +343,7 @@ export default function CreateAnamnese() {
           </FieldSet>
         </div>
 
-        <div className={cn('flex w-full justify-between')}>
-          <Button
-            type="reset"
-            className={cn(
-              'bg-background text-destructive border-destructive mt-2 border-2 font-bold',
-              'hover:text-background transition-all duration-200 hover:bg-red-700',
-            )}
-          >
-            Limpar
-          </Button>
-
-          <Button
-            type="submit"
-            className={cn(
-              'bg-background mt-2 border-2 border-green-600 font-bold text-green-600',
-              'hover:text-background transition-all duration-200 hover:bg-green-600',
-            )}
-          >
-            Cadastrar
-          </Button>
-        </div>
+        <ButtonRegister />
       </form>
     </div>
   );

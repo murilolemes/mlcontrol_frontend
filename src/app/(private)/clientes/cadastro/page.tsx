@@ -1,5 +1,13 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Field } from '@/components/ui/field';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   addMonths,
@@ -7,14 +15,15 @@ import {
   differenceInDays,
   differenceInMonths,
   differenceInYears,
+  format,
   isValid,
-  parse,
+  parseISO,
 } from 'date-fns';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
+import { ButtonRegister } from '@/components/forms/button-register';
 import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   InputGroup,
@@ -22,23 +31,25 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
-import { useClient } from '@/context/clientContext';
 import { useConsult } from '@/context/consultCnpj';
 import { cn } from '@/lib/utils';
+import { apiCep } from '@/services/api';
 import { validateCnpj } from '@/utils/validateCnpj';
 import { validateCpf } from '@/utils/validateCpf';
 import { useMask } from '@react-input/mask';
-import { Check, PlusIcon } from 'lucide-react';
-import { useState, type ChangeEvent } from 'react';
+import { CalendarIcon, Check, PlusIcon, Search, Trash2 } from 'lucide-react';
+import { useEffect, useState, type ChangeEvent } from 'react';
+import { toast } from 'react-toastify';
 
 const clientFormSchema = z
   .object({
@@ -49,8 +60,16 @@ const clientFormSchema = z
     type: z.enum(['PF', 'PJ']),
     cpfCnpj: z.string().optional(),
     stateRegistration: z.string().optional(),
-    email: z.string().email('E-mail inválido').or(z.literal('')).optional(),
-    phone: z.string().optional(),
+    emails: z.array(
+      z.object({
+        address: z.string().trim().email('E-mail inválido').or(z.literal('')),
+      }),
+    ),
+    phones: z.array(
+      z.object({
+        number: z.string().trim().optional(),
+      }),
+    ),
     observation: z.string().optional(),
     birthDate: z.string().optional(),
     age: z.string().optional(),
@@ -106,13 +125,12 @@ const initialFormValues: ClientFormSchema = {
   type: 'PF',
   cpfCnpj: '',
   stateRegistration: '',
-  email: '',
-  phone: '',
+  emails: [{ address: '' }],
+  phones: [{ number: '' }],
   observation: '',
   birthDate: '',
   age: '',
-  clinicalDiagnosis: '',
-  gender: 'S',
+  gender: '',
   occupation: '',
   address: '',
   number: '',
@@ -122,11 +140,66 @@ const initialFormValues: ClientFormSchema = {
   city: '',
   state: '',
   uf: '',
-  emergencyContact: '',
-  emergencyContactName: '',
   rg: '',
   ie: '',
 };
+
+const brazilianStates = [
+  { value: 'AC', label: 'AC - Acre', name: 'Acre' },
+  { value: 'AL', label: 'AL - Alagoas', name: 'Alagoas' },
+  { value: 'AP', label: 'AP - Amapá', name: 'Amapá' },
+  { value: 'AM', label: 'AM - Amazonas', name: 'Amazonas' },
+  { value: 'BA', label: 'BA - Bahia', name: 'Bahia' },
+  { value: 'CE', label: 'CE - Ceará', name: 'Ceará' },
+  { value: 'DF', label: 'DF - Distrito Federal', name: 'Distrito Federal' },
+  { value: 'ES', label: 'ES - Espírito Santo', name: 'Espírito Santo' },
+  { value: 'GO', label: 'GO - Goiás', name: 'Goiás' },
+  { value: 'MA', label: 'MA - Maranhão', name: 'Maranhão' },
+  { value: 'MT', label: 'MT - Mato Grosso', name: 'Mato Grosso' },
+  { value: 'MS', label: 'MS - Mato Grosso do Sul', name: 'Mato Grosso do Sul' },
+  { value: 'MG', label: 'MG - Minas Gerais', name: 'Minas Gerais' },
+  { value: 'PA', label: 'PA - Pará', name: 'Pará' },
+  { value: 'PB', label: 'PB - Paraíba', name: 'Paraíba' },
+  { value: 'PR', label: 'PR - Paraná', name: 'Paraná' },
+  { value: 'PE', label: 'PE - Pernambuco', name: 'Pernambuco' },
+  { value: 'PI', label: 'PI - Piauí', name: 'Piauí' },
+  { value: 'RJ', label: 'RJ - Rio de Janeiro', name: 'Rio de Janeiro' },
+  {
+    value: 'RN',
+    label: 'RN - Rio Grande do Norte',
+    name: 'Rio Grande do Norte',
+  },
+  { value: 'RS', label: 'RS - Rio Grande do Sul', name: 'Rio Grande do Sul' },
+  { value: 'RO', label: 'RO - Rondônia', name: 'Rondônia' },
+  { value: 'RR', label: 'RR - Roraima', name: 'Roraima' },
+  { value: 'SC', label: 'SC - Santa Catarina', name: 'Santa Catarina' },
+  { value: 'SP', label: 'SP - São Paulo', name: 'São Paulo' },
+  { value: 'SE', label: 'SE - Sergipe', name: 'Sergipe' },
+  { value: 'TO', label: 'TO - Tocantins', name: 'Tocantins' },
+] as const;
+
+function normalizeBrazilianState(value?: string) {
+  if (!value) {
+    return '';
+  }
+
+  const normalizedValue = value.trim().toLowerCase();
+  const normalizedCode = value.trim().toUpperCase();
+
+  const matchedByCode = brazilianStates.find(
+    (state) => state.value === normalizedCode,
+  );
+
+  if (matchedByCode) {
+    return matchedByCode.value;
+  }
+
+  const matchedByName = brazilianStates.find(
+    (state) => state.name.toLowerCase() === normalizedValue,
+  );
+
+  return matchedByName?.value ?? '';
+}
 
 type MaskedInputProps = {
   id: string;
@@ -199,15 +272,14 @@ function MaskedInputGroupInput({
 
 export default function CreateClient() {
   const { handleConsult } = useConsult();
-  const { createClient } = useClient();
   const [clientType, setClientType] = useState<'PF' | 'PJ'>('PF');
   const [cnpj, setCnpj] = useState<string>('');
-  const [age, setAge] = useState<string | null>(null);
+  const [openCalendar, setOpenCalendar] = useState(false);
+  const [loadingCep, setLoadingCep] = useState(false);
 
   const maskCpf = '___.___.___-__';
   const maskCnpj = '__.___.___/____-__';
   const maskRg = '__.___.___-_';
-  const maskBirthDate = '__/__/____';
   const maskIe = '___.___.___.___';
   const maskPhone = '(__) _____-____';
   const maskCep = '_____-___';
@@ -217,11 +289,35 @@ export default function CreateClient() {
     handleSubmit,
     reset,
     control,
+    getValues,
     setValue,
     formState: { errors },
   } = useForm<ClientFormSchema>({
     resolver: zodResolver(clientFormSchema),
     defaultValues: initialFormValues,
+  });
+
+  const {
+    fields: emailFields,
+    append: appendEmail,
+    remove: removeEmail,
+  } = useFieldArray({
+    control,
+    name: 'emails',
+  });
+
+  const {
+    fields: phoneFields,
+    append: appendPhone,
+    remove: removePhone,
+  } = useFieldArray({
+    control,
+    name: 'phones',
+  });
+
+  const birthDateValue = useWatch({
+    control,
+    name: 'birthDate',
   });
 
   function handleResetForm(type: 'PF' | 'PJ' = 'PF') {
@@ -231,24 +327,55 @@ export default function CreateClient() {
     });
     setClientType(type);
     setCnpj('');
-    setAge(null);
+  }
+
+  function handleTypeChange(nextType: 'PF' | 'PJ') {
+    const values = getValues();
+
+    reset({
+      ...values,
+      type: nextType,
+      cpfCnpj: '',
+      rg: '',
+      occupation: '',
+      gender: '',
+      birthDate: '',
+      age: '',
+      fantasyName: '',
+      stateRegistration: '',
+      ie: '',
+    });
+
+    setClientType(nextType);
+    setCnpj('');
   }
 
   async function onSubmit(data: ClientFormSchema) {
     try {
-      await createClient({
-        name: data.name.trim(),
-        fantasyName: data.fantasyName?.trim() || undefined,
-        type: data.type,
-        cpfCnpj: data.cpfCnpj ? data.cpfCnpj.replace(/\D/g, '') : undefined,
-        email: data.email?.trim() ? data.email.trim().toLowerCase() : undefined,
-        phone: data.phone?.trim() || undefined,
-        stateRegistration:
-          data.type === 'PJ'
-            ? data.stateRegistration?.trim() || undefined
-            : undefined,
-        observation: data.observation?.trim() || undefined,
-      });
+      console.log(data);
+      // const emails = data.emails
+      //   .map((item) => item.address.trim().toLowerCase())
+      //   .filter(Boolean);
+
+      // const phones = data.phones
+      //   .map((item) => item.number?.trim() || '')
+      //   .filter(Boolean);
+
+      // await createClient({
+      //   name: data.name.trim(),
+      //   fantasyName: data.fantasyName?.trim() || undefined,
+      //   type: data.type,
+      //   cpfCnpj: data.cpfCnpj ? data.cpfCnpj.replace(/\D/g, '') : undefined,
+      //   email: emails[0],
+      //   emails,
+      //   phone: phones[0],
+      //   phones,
+      //   stateRegistration:
+      //     data.type === 'PJ'
+      //       ? data.stateRegistration?.trim() || undefined
+      //       : undefined,
+      //   observation: data.observation?.trim() || undefined,
+      // });
 
       handleResetForm();
     } catch {}
@@ -259,15 +386,17 @@ export default function CreateClient() {
     // console.log(cnpj);
   }
 
-  function handleAgeCalculation(dateString: string) {
-    if (!dateString || dateString.includes('_')) {
-      return null;
+  useEffect(() => {
+    if (!birthDateValue) {
+      setValue('age', '');
+      return;
     }
 
-    const birthDate = parse(dateString, 'dd/MM/yyyy', new Date());
+    const birthDate = parseISO(birthDateValue);
 
     if (!isValid(birthDate)) {
-      return null;
+      setValue('age', '');
+      return;
     }
 
     const today = new Date();
@@ -282,11 +411,66 @@ export default function CreateClient() {
 
     const days = differenceInDays(today, dateAfterMonths);
 
-    setAge(`${years} anos, ${months} meses e ${days} dias`);
+    setValue('age', `${years} anos, ${months} meses e ${days} dias`);
+  }, [birthDateValue, setValue]);
+
+  async function handleSearchCep(cep: string) {
+    const cleanCep = cep.replace(/\D/g, '');
+
+    if (cleanCep.length !== 8) {
+      toast.error('Informe um CEP válido com 8 dígitos.');
+      return;
+    }
+
+    setLoadingCep(true);
+
+    try {
+      const response = await apiCep.get(`/${cleanCep}/json`);
+      const data = response.data;
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      if (data?.erro) {
+        toast.error('CEP não encontrado.');
+        return;
+      }
+
+      setValue('address', data.logradouro ?? data.street ?? '', {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('neighborhood', data.bairro ?? data.district ?? '', {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('city', data.localidade ?? data.city ?? '', {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('state', data.estado ?? data.state ?? data.uf ?? '', {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue(
+        'uf',
+        normalizeBrazilianState(data.uf ?? data.state ?? data.estado),
+        {
+          shouldDirty: true,
+          shouldTouch: true,
+        },
+      );
+      setValue('cep', cleanCep, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao consultar o CEP.');
+    } finally {
+      setLoadingCep(false);
+    }
   }
 
   return (
-    <div className={cn('flex h-full w-full flex-col gap-4')}>
+    <div className={cn('flex w-full flex-col gap-4')}>
       {/* TITULO */}
       <TriggerSideBar title="Clientes" subTitle={['Cadastro']} />
 
@@ -294,105 +478,88 @@ export default function CreateClient() {
         onSubmit={handleSubmit(onSubmit)}
         onReset={() => handleResetForm()}
         className={cn(
-          'flex h-full w-full flex-col items-center justify-between',
+          'flex h-full w-full flex-col items-center justify-between gap-4',
         )}
       >
-        <div className={cn('flex w-full flex-col gap-4')}>
-          <div className="flex justify-between">
+        <div className={cn('flex w-full flex-col gap-2')}>
+          <div className="flex flex-col gap-2 md:flex-row">
             {/* TIPO DE CLIENTE */}
-            <div className={cn('flex items-end justify-between')}>
-              <div className={cn('flex w-fit flex-col gap-2')}>
-                <Label htmlFor="type" className="text-foreground/60">
-                  Tipo
-                </Label>
+            <div className={cn('flex flex-1 flex-col gap-0.5')}>
+              <div className="flex flex-col gap-0.5">
+                <Label className="text-foreground/60">Tipo</Label>
                 <Controller
                   control={control}
                   name="type"
                   render={({ field }) => (
-                    <RadioGroup
-                      key={field.name}
+                    <Select
+                      value={field.value || 'PF'}
                       onValueChange={(value: 'PF' | 'PJ') => {
                         field.onChange(value);
-                        setClientType(value);
-                        setValue('cpfCnpj', '');
-                        setCnpj('');
+                        handleTypeChange(value);
                       }}
-                      value={field.value}
-                      className="flex h-full justify-around gap-8"
                     >
-                      <div className="flex items-center gap-1">
-                        <RadioGroupItem value="PF" id="pf" />
-                        <Label
-                          htmlFor="pf"
-                          className="text-foreground/60 text-sm font-normal"
-                        >
-                          Pessoa Física
-                        </Label>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <RadioGroupItem value="PJ" id="pj" />
-                        <Label
-                          htmlFor="pj"
-                          className="text-foreground/60 text-sm font-normal"
-                        >
-                          Pessoa Jurídica
-                        </Label>
-                      </div>
-                    </RadioGroup>
+                      <SelectTrigger id="gender" className="w-full">
+                        <SelectValue placeholder="Selecione o sexo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="PF">Pessoa Fisica</SelectItem>
+                          <SelectItem value="PJ">Pessoa Juridica</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   )}
                 />
-                {errors.type && (
-                  <small className="text-2sm text-red-400">
-                    {errors.type.message}
-                  </small>
-                )}
               </div>
+              {errors.type && (
+                <small className="text-2sm text-red-400">
+                  {errors.type.message}
+                </small>
+              )}
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex flex-1 flex-col gap-1 md:flex-row md:items-end">
               {/* CPF || CNPJ */}
-              <div className="flex w-75">
-                <div className="flex flex-1 flex-col gap-2">
+              <div className="flex w-full">
+                <div className="flex flex-1 flex-col gap-0.5">
                   <Label htmlFor="cpfCnpj" className="text-foreground/60">
                     {clientType === 'PF' ? 'CPF' : 'CNPJ'}
                   </Label>
 
-                  <div className={cn('flex flex-row items-center gap-2')}>
-                    <Controller
-                      name="cpfCnpj"
-                      control={control}
-                      render={({ field }) => {
-                        const isValidCpfCnpj = field.value
-                          ? clientType === 'PF'
-                            ? validateCpf(field.value)
-                            : validateCnpj(field.value)
-                          : false;
+                  <Controller
+                    name="cpfCnpj"
+                    control={control}
+                    render={({ field }) => {
+                      const isValidCpfCnpj = field.value
+                        ? clientType === 'PF'
+                          ? validateCpf(field.value)
+                          : validateCnpj(field.value)
+                        : false;
 
-                        return (
-                          <InputGroup>
-                            <MaskedInputGroupInput
-                              id="cpfCnpj"
-                              mask={clientType === 'PF' ? maskCpf : maskCnpj}
-                              placeholder={`Digite seu ${clientType === 'PF' ? 'CPF' : 'CNPJ'}`}
-                              value={field.value || ''}
-                              onChange={(event) => {
-                                field.onChange(event);
-                                setCnpj(event.target.value);
-                              }}
-                              onBlur={field.onBlur}
-                              name={field.name}
-                              className="w-67"
-                            />
-                            <InputGroupAddon align="inline-end">
-                              {isValidCpfCnpj && (
-                                <Check size={16} className="text-green-600" />
-                              )}
-                            </InputGroupAddon>
-                          </InputGroup>
-                        );
-                      }}
-                    />
-                  </div>
+                      return (
+                        <InputGroup>
+                          <MaskedInputGroupInput
+                            id="cpfCnpj"
+                            mask={clientType === 'PF' ? maskCpf : maskCnpj}
+                            placeholder={`Digite seu ${clientType === 'PF' ? 'CPF' : 'CNPJ'}`}
+                            value={field.value}
+                            onChange={(event) => {
+                              field.onChange(event);
+                              setCnpj(event.target.value);
+                            }}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            className="w-full"
+                          />
+                          <InputGroupAddon align="inline-end">
+                            {isValidCpfCnpj && (
+                              <Check size={16} className="text-green-600" />
+                            )}
+                          </InputGroupAddon>
+                        </InputGroup>
+                      );
+                    }}
+                  />
 
                   {errors.cpfCnpj && (
                     <small className="text-sm text-red-400">
@@ -408,8 +575,9 @@ export default function CreateClient() {
                   disabled
                   onClick={() => handleConsultCnpj(cnpj)}
                   className={cn(
-                    'bg-background h-full border-2 border-blue-600 font-bold text-blue-600',
-                    'hover:enabled:text-background text-xs transition-all duration-200 hover:enabled:bg-blue-600',
+                    'bg-background border-2 border-blue-600 text-blue-600',
+                    'hover:enabled:text-background text-xs transition-all',
+                    'font-bold duration-200 hover:enabled:bg-blue-600',
                   )}
                 >
                   Consultar CNPJ
@@ -419,7 +587,7 @@ export default function CreateClient() {
           </div>
 
           {/* NOME */}
-          <div className="flex flex-1 flex-col gap-2">
+          <div className="flex flex-1 flex-col gap-0.5">
             <Label htmlFor="name" className="text-foreground/60">
               Nome
             </Label>
@@ -437,10 +605,10 @@ export default function CreateClient() {
             )}
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-2 md:flex-row">
             {/* RG */}
             {clientType === 'PF' && (
-              <div className="flex flex-1 flex-col gap-2">
+              <div className="flex flex-1 flex-col gap-0.5">
                 <Label htmlFor="rg" className="text-foreground/60">
                   RG
                 </Label>
@@ -454,7 +622,7 @@ export default function CreateClient() {
                         id="rg"
                         mask={maskRg}
                         placeholder="Digite seu RG"
-                        value={field.value || ''}
+                        value={clientType === 'PF' ? field.value : ''}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
                         name={field.name}
@@ -473,7 +641,7 @@ export default function CreateClient() {
 
             {/* NOME FANTASIA */}
             {clientType === 'PJ' && (
-              <div className="flex flex-1 flex-col gap-2">
+              <div className="flex flex-1 flex-col gap-0.5">
                 <Label htmlFor="fantasyName" className="text-foreground/60">
                   Nome Fantasia
                 </Label>
@@ -493,30 +661,55 @@ export default function CreateClient() {
             )}
 
             {/* DATA DE NASCIMENTO */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="birthDate" className="text-foreground/60">
+            <Field className="flex flex-col gap-0.5 md:w-fit">
+              <Label className="text-foreground/60">
                 Data de {clientType === 'PF' ? 'Nascimento' : 'Abertura'}
               </Label>
 
               <Controller
-                name="birthDate"
                 control={control}
-                render={({ field }) => {
-                  return (
-                    <MaskedInput
-                      id="birthDate"
-                      mask={maskBirthDate}
-                      placeholder="Digite a data"
-                      value={field.value || ''}
-                      onChange={field.onChange}
-                      onBlur={() => {
-                        handleAgeCalculation(field.value || '');
-                        field.onBlur();
-                      }}
-                      name={field.name}
-                    />
-                  );
-                }}
+                name="birthDate"
+                render={({ field }) => (
+                  <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
+                    <PopoverTrigger
+                      className={cn(
+                        'text-foreground/60 flex h-8 items-center justify-between',
+                        'bg-background rounded-lg border px-2 py-1 text-sm',
+                      )}
+                    >
+                      {field.value
+                        ? format(parseISO(field.value), 'dd/MM/yyyy')
+                        : 'Data'}
+
+                      <CalendarIcon size={16} className="text-foreground/60" />
+                    </PopoverTrigger>
+
+                    <PopoverContent
+                      className="w-auto overflow-hidden p-0"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? parseISO(field.value) : undefined
+                        }
+                        defaultMonth={
+                          field.value ? parseISO(field.value) : undefined
+                        }
+                        captionLayout="dropdown"
+                        onSelect={(selectedDate) => {
+                          field.onChange(
+                            selectedDate
+                              ? format(selectedDate, 'yyyy-MM-dd')
+                              : '',
+                          );
+
+                          setOpenCalendar(false);
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
               />
 
               {errors.birthDate && (
@@ -524,21 +717,30 @@ export default function CreateClient() {
                   {errors.birthDate.message}
                 </small>
               )}
-            </div>
+            </Field>
 
             {/* IDADE */}
             {clientType === 'PF' && (
-              <div className="flex flex-col gap-2">
+              <div className="flex w-full flex-col gap-0.5 md:max-w-50">
                 <Label htmlFor="age" className="text-foreground/60">
                   Idade
                 </Label>
 
-                <Input
-                  id="age"
-                  placeholder="Idade"
-                  disabled
-                  value={age || ''}
-                  {...register('age')}
+                <Controller
+                  name="age"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      id="age"
+                      placeholder="Idade"
+                      readOnly
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      className="bg-input/30"
+                    />
+                  )}
                 />
 
                 {errors.age && (
@@ -551,7 +753,7 @@ export default function CreateClient() {
 
             {/* INSCRIÇÃO ESTADUAL */}
             {clientType === 'PJ' && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-0.5">
                 <Label
                   htmlFor="stateRegistration"
                   className="text-foreground/60"
@@ -568,7 +770,7 @@ export default function CreateClient() {
                         id="stateRegistration"
                         mask={maskIe}
                         placeholder="Digite sua inscrição estadual"
-                        value={field.value || ''}
+                        value={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
                         name={field.name}
@@ -586,82 +788,10 @@ export default function CreateClient() {
             )}
           </div>
 
-          <div className="flex gap-4">
-            {/* E-MAIL */}
-            <div className="flex flex-1 flex-col gap-2">
-              <Label htmlFor="email" className="text-foreground/60">
-                E-mail
-              </Label>
-
-              <div className="flex gap-1.5">
-                <Input
-                  id="email"
-                  placeholder="Digite seu email"
-                  {...register('email')}
-                />
-
-                <Button
-                  type="button"
-                  className={cn(
-                    'bg-background text-foreground shadow-foreground/60 shadow-[0_0_2px]',
-                  )}
-                >
-                  <PlusIcon />
-                </Button>
-              </div>
-              {errors.email && (
-                <small className="text-sm text-red-400">
-                  {errors.email.message}
-                </small>
-              )}
-            </div>
-
-            {/* TELEFONE */}
-            <div className="flex flex-1 flex-col gap-2">
-              <Label htmlFor="phone" className="text-foreground/60">
-                Telefone
-              </Label>
-
-              <div className="flex gap-1.5">
-                <Controller
-                  name="phone"
-                  control={control}
-                  render={({ field }) => {
-                    return (
-                      <MaskedInput
-                        id="phone"
-                        mask={maskPhone}
-                        placeholder="Digite seu telefone"
-                        value={field.value || ''}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                      />
-                    );
-                  }}
-                />
-                <Button
-                  type="button"
-                  className={cn(
-                    'bg-background text-foreground shadow-foreground/60 shadow-[0_0_2px]',
-                  )}
-                >
-                  <PlusIcon />
-                </Button>
-              </div>
-
-              {errors.phone && (
-                <small className="text-sm text-red-400">
-                  {errors.phone.message}
-                </small>
-              )}
-            </div>
-          </div>
-
           {clientType === 'PF' && (
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-2 md:flex-row">
               {/* PROFISSÃO */}
-              <div className="flex flex-1 flex-col gap-2">
+              <div className="flex flex-1 flex-col gap-0.5">
                 <Label htmlFor="occupation" className="text-foreground/60">
                   Profissão
                 </Label>
@@ -680,26 +810,22 @@ export default function CreateClient() {
               </div>
 
               {/* SEXO */}
-              <div className="flex flex-1 flex-col gap-2">
-                <Label htmlFor="gender" className="text-foreground/60">
-                  Sexo
-                </Label>
+              <div className="flex flex-1 flex-col gap-0.5">
+                <Label className="text-foreground/60">Sexo</Label>
                 <Controller
-                  name="gender"
                   control={control}
+                  name="gender"
                   render={({ field }) => (
-                    <Select
-                      value={field.value || 'S'}
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger id="gender" className="w-full">
-                        <SelectValue />
+                        <SelectValue placeholder="Selecione o sexo" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="S">Selecione</SelectItem>
-                        <SelectItem value="M">Masculino</SelectItem>
-                        <SelectItem value="F">Feminino</SelectItem>
-                        <SelectItem value="O">Outros</SelectItem>
+                        <SelectGroup>
+                          <SelectItem value="M">Masculino</SelectItem>
+                          <SelectItem value="F">Feminino</SelectItem>
+                          <SelectItem value="O">Outros</SelectItem>
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
                   )}
@@ -708,30 +834,43 @@ export default function CreateClient() {
             </div>
           )}
 
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-2 md:flex-row">
             {/* CEP */}
-            <div className="flex w-50 flex-col gap-2">
+            <div className="flex flex-col gap-0.5 md:w-50">
               <Label htmlFor="cep" className="text-foreground/60">
                 CEP
               </Label>
 
-              <Controller
-                name="cep"
-                control={control}
-                render={({ field }) => {
-                  return (
-                    <MaskedInput
-                      id="cep"
-                      mask={maskCep}
-                      placeholder="Digite o CEP"
-                      value={field.value || ''}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                    />
-                  );
-                }}
-              />
+              <div className="flex items-end gap-1.5">
+                <Controller
+                  name="cep"
+                  control={control}
+                  render={({ field }) => {
+                    return (
+                      <MaskedInput
+                        id="cep"
+                        mask={maskCep}
+                        placeholder="Digite o CEP"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                      />
+                    );
+                  }}
+                />
+
+                <Button
+                  type="button"
+                  disabled={loadingCep}
+                  onClick={() => handleSearchCep(getValues('cep') || '')}
+                  className={cn(
+                    'bg-background text-foreground/50 border-input border',
+                  )}
+                >
+                  <Search size={16} />
+                </Button>
+              </div>
 
               {errors.cep && (
                 <small className="text-sm text-red-400">
@@ -741,16 +880,24 @@ export default function CreateClient() {
             </div>
 
             {/* LOGRADOURO */}
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="address" className="text-foreground/60">
                 Logradouro
               </Label>
 
-              <Input
-                id="address"
-                placeholder="Digite o logradouro"
-                {...register('address')}
-              />
+              <InputGroup>
+                <InputGroupInput
+                  id="address"
+                  readOnly={loadingCep}
+                  placeholder="Digite o logradouro"
+                  {...register('address')}
+                />
+                {loadingCep && (
+                  <InputGroupAddon align="inline-end">
+                    <Spinner />
+                  </InputGroupAddon>
+                )}
+              </InputGroup>
 
               {errors.address && (
                 <small className="text-sm text-red-400">
@@ -760,7 +907,7 @@ export default function CreateClient() {
             </div>
 
             {/* NUMERO */}
-            <div className="flex w-50 flex-col gap-2">
+            <div className="flex flex-col gap-0.5 md:w-50">
               <Label htmlFor="number" className="text-foreground/60">
                 Número
               </Label>
@@ -779,18 +926,26 @@ export default function CreateClient() {
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-2 md:flex-row">
             {/* BAIRRO */}
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="neighborhood" className="text-foreground/60">
                 Bairro
               </Label>
 
-              <Input
-                id="neighborhood"
-                placeholder="Digite o bairro"
-                {...register('neighborhood')}
-              />
+              <InputGroup>
+                <InputGroupInput
+                  id="neighborhood"
+                  readOnly={loadingCep}
+                  placeholder="Digite o bairro"
+                  {...register('neighborhood')}
+                />
+                {loadingCep && (
+                  <InputGroupAddon align="inline-end">
+                    <Spinner />
+                  </InputGroupAddon>
+                )}
+              </InputGroup>
 
               {errors.neighborhood && (
                 <small className="text-sm text-red-400">
@@ -800,7 +955,7 @@ export default function CreateClient() {
             </div>
 
             {/* COMPLEMENTO */}
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="complement" className="text-foreground/60">
                 Complemento
               </Label>
@@ -819,18 +974,26 @@ export default function CreateClient() {
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-2 md:flex-row">
             {/* CIDADE */}
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="city" className="text-foreground/60">
                 Cidade
               </Label>
 
-              <Input
-                id="city"
-                placeholder="Digite a cidade"
-                {...register('city')}
-              />
+              <InputGroup>
+                <InputGroupInput
+                  id="city"
+                  readOnly={loadingCep}
+                  placeholder="Digite a cidade"
+                  {...register('city')}
+                />
+                {loadingCep && (
+                  <InputGroupAddon align="inline-end">
+                    <Spinner />
+                  </InputGroupAddon>
+                )}
+              </InputGroup>
 
               {errors.city && (
                 <small className="text-sm text-red-400">
@@ -840,16 +1003,23 @@ export default function CreateClient() {
             </div>
 
             {/* ESTADO */}
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-0.5">
               <Label htmlFor="state" className="text-foreground/60">
                 Estado
               </Label>
-
-              <Input
-                id="state"
-                placeholder="Digite o estado"
-                {...register('state')}
-              />
+              <InputGroup>
+                <InputGroupInput
+                  id="state"
+                  readOnly={loadingCep}
+                  placeholder="Digite o estado"
+                  {...register('state')}
+                />
+                {loadingCep && (
+                  <InputGroupAddon align="inline-end">
+                    <Spinner />
+                  </InputGroupAddon>
+                )}
+              </InputGroup>
 
               {errors.state && (
                 <small className="text-sm text-red-400">
@@ -859,12 +1029,32 @@ export default function CreateClient() {
             </div>
 
             {/* UF */}
-            <div className="flex w-50 flex-col gap-2">
-              <Label htmlFor="uf" className="text-foreground/60">
-                UF
-              </Label>
-
-              <Input id="uf" placeholder="Digite a UF" {...register('uf')} />
+            <div className="flex flex-col gap-0.5 md:w-50">
+              <Label className="text-foreground/60">UF</Label>
+              <Controller
+                control={control}
+                name="uf"
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={loadingCep}
+                  >
+                    <SelectTrigger id="uf" className="w-full">
+                      <SelectValue placeholder="Selecione a UF" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {brazilianStates.map((state) => (
+                          <SelectItem key={state.value} value={state.value}>
+                            {state.value}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
 
               {errors.uf && (
                 <small className="text-sm text-red-400">
@@ -875,7 +1065,7 @@ export default function CreateClient() {
           </div>
 
           {/* OBSERVAÇÃO */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-0.5">
             <Label htmlFor="observation" className="text-foreground/60">
               Observação
             </Label>
@@ -892,30 +1082,135 @@ export default function CreateClient() {
               </small>
             )}
           </div>
+
+          <div className="flex flex-col gap-2 md:flex-row">
+            {/* E-MAIL */}
+            <div className="flex flex-1 flex-col gap-0.5">
+              <Label htmlFor="email" className="text-foreground/60">
+                E-mail
+              </Label>
+
+              <div className="flex flex-col gap-1.5">
+                {emailFields.map((field, index) => {
+                  const emailError = errors.emails?.[index]?.address;
+                  return (
+                    <div key={field.id} className="flex flex-col gap-0.5">
+                      <div className="flex gap-1.5">
+                        <Input
+                          id={`email-${index}`}
+                          placeholder="Digite seu email"
+                          {...register(`emails.${index}.address` as const)}
+                        />
+
+                        <Button
+                          type="button"
+                          onClick={() => appendEmail({ address: '' })}
+                          className={cn(
+                            'bg-background text-foreground/50 border-input border',
+                          )}
+                          aria-label="Adicionar e-mail"
+                        >
+                          <PlusIcon />
+                        </Button>
+
+                        {emailFields.length > 1 && (
+                          <Button
+                            type="button"
+                            onClick={() => removeEmail(index)}
+                            className={cn(
+                              'bg-background text-foreground/50 border-input border',
+                            )}
+                            aria-label="Remover e-mail"
+                          >
+                            <Trash2 />
+                          </Button>
+                        )}
+                      </div>
+                      {emailError ? (
+                        <small
+                          key={`email-error-${field.id}`}
+                          className="text-sm text-red-400"
+                        >
+                          {emailError.message}
+                        </small>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* TELEFONE */}
+            <div className="flex flex-1 flex-col gap-0.5">
+              <Label htmlFor="phone" className="text-foreground/60">
+                Telefone
+              </Label>
+
+              <div className="flex flex-col gap-1.5">
+                {phoneFields.map((field, index) => {
+                  const phoneError = errors.phones?.[index]?.number;
+                  return (
+                    <div key={field.id} className="flex flex-col gap-0.5">
+                      <div key={field.id} className="flex gap-1.5">
+                        <Controller
+                          name={`phones.${index}.number` as const}
+                          control={control}
+                          render={({ field: phoneField }) => {
+                            return (
+                              <MaskedInput
+                                id={`phone-${index}`}
+                                mask={maskPhone}
+                                placeholder="Digite seu telefone"
+                                value={phoneField.value || ''}
+                                onChange={phoneField.onChange}
+                                onBlur={phoneField.onBlur}
+                                name={phoneField.name}
+                              />
+                            );
+                          }}
+                        />
+
+                        <Button
+                          type="button"
+                          onClick={() => appendPhone({ number: '' })}
+                          className={cn(
+                            'bg-background text-foreground/50 border-input border',
+                          )}
+                          aria-label="Adicionar telefone"
+                        >
+                          <PlusIcon />
+                        </Button>
+
+                        {phoneFields.length > 1 && (
+                          <Button
+                            type="button"
+                            onClick={() => removePhone(index)}
+                            className={cn(
+                              'bg-background text-foreground/50 border-input border',
+                            )}
+                            aria-label="Remover telefone"
+                          >
+                            <Trash2 />
+                          </Button>
+                        )}
+                      </div>
+                      {phoneError ? (
+                        <small
+                          key={`phone-error-${field.id}`}
+                          className="text-sm text-red-400"
+                        >
+                          {phoneError.message}
+                        </small>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* BOTÕES  */}
-        <div className={cn('flex w-full justify-between')}>
-          <Button
-            type="reset"
-            className={cn(
-              'bg-background text-destructive border-destructive mt-2 border-2 font-bold',
-              'hover:text-background transition-all duration-200 hover:bg-red-700',
-            )}
-          >
-            Limpar
-          </Button>
-
-          <Button
-            type="submit"
-            className={cn(
-              'bg-background mt-2 border-2 border-green-600 font-bold text-green-600',
-              'hover:text-background transition-all duration-200 hover:bg-green-600',
-            )}
-          >
-            Cadastrar
-          </Button>
-        </div>
+        <ButtonRegister />
       </form>
     </div>
   );
