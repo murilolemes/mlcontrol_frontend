@@ -41,14 +41,14 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
-import { useConsult } from '@/context/consultCnpj';
+import { useConsult, type Consult } from '@/context/consultCnpj';
 import { cn } from '@/lib/utils';
 import { apiCep } from '@/services/api';
 import { validateCnpj } from '@/utils/validateCnpj';
 import { validateCpf } from '@/utils/validateCpf';
 import { useMask } from '@react-input/mask';
 import { CalendarIcon, Check, PlusIcon, Search, Trash2 } from 'lucide-react';
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useState, type ChangeEvent } from 'react';
 import { toast } from 'react-toastify';
 
 const clientFormSchema = z
@@ -201,6 +201,16 @@ function normalizeBrazilianState(value?: string) {
   return matchedByName?.value ?? '';
 }
 
+function formatCepValue(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+
+  if (digits.length <= 5) {
+    return digits;
+  }
+
+  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}-${digits.slice(5)}`;
+}
+
 type MaskedInputProps = {
   id: string;
   mask: string;
@@ -271,7 +281,7 @@ function MaskedInputGroupInput({
 }
 
 export default function CreateClient() {
-  const { handleConsult } = useConsult();
+  const { handleReceitaws, loadingReceitaws } = useConsult();
   const [clientType, setClientType] = useState<'PF' | 'PJ'>('PF');
   const [cnpj, setCnpj] = useState<string>('');
   const [openCalendar, setOpenCalendar] = useState(false);
@@ -282,7 +292,7 @@ export default function CreateClient() {
   const maskRg = '__.___.___-_';
   const maskIe = '___.___.___.___';
   const maskPhone = '(__) _____-____';
-  const maskCep = '_____-___';
+  const maskCep = '__.___-___';
 
   const {
     register,
@@ -297,10 +307,16 @@ export default function CreateClient() {
     defaultValues: initialFormValues,
   });
 
+  const cpfCnpjValue = useWatch({
+    control,
+    name: 'cpfCnpj',
+  });
+
   const {
     fields: emailFields,
     append: appendEmail,
     remove: removeEmail,
+    replace: replaceEmails,
   } = useFieldArray({
     control,
     name: 'emails',
@@ -310,6 +326,7 @@ export default function CreateClient() {
     fields: phoneFields,
     append: appendPhone,
     remove: removePhone,
+    replace: replacePhones,
   } = useFieldArray({
     control,
     name: 'phones',
@@ -350,6 +367,58 @@ export default function CreateClient() {
     setCnpj('');
   }
 
+  const applyConsultData = useCallback(
+    (data: Consult | null) => {
+      if (!data) {
+        return;
+      }
+
+      setValue('name', data.name, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('fantasyName', data.fantasyName, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      replaceEmails([{ address: data.email }]);
+      replacePhones([{ number: data.phone }]);
+      setValue('cep', formatCepValue(data.cep), {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('address', data.street, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('number', data.number, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('neighborhood', data.district, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('complement', data.complement, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('city', data.city, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('state', data.uf, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('uf', normalizeBrazilianState(data.uf), {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    },
+    [replaceEmails, replacePhones, setValue],
+  );
+
   async function onSubmit(data: ClientFormSchema) {
     try {
       console.log(data);
@@ -381,10 +450,20 @@ export default function CreateClient() {
     } catch {}
   }
 
-  function handleConsultCnpj(cnpj: string) {
-    handleConsult(cnpj);
-    // console.log(cnpj);
-  }
+  const handleConsultCnpj = useCallback(
+    async (cnpj: string) => {
+      const cleanCnpj = cnpj.replace(/\D/g, '');
+
+      if (cleanCnpj.length !== 14) {
+        toast.error('Informe um CNPJ válido com 14 digitos.');
+        return;
+      }
+
+      const consultData = await handleReceitaws(cleanCnpj);
+      applyConsultData(consultData);
+    },
+    [applyConsultData, handleReceitaws],
+  );
 
   useEffect(() => {
     if (!birthDateValue) {
@@ -414,6 +493,16 @@ export default function CreateClient() {
     setValue('age', `${years} anos, ${months} meses e ${days} dias`);
   }, [birthDateValue, setValue]);
 
+  // useEffect(() => {
+  //   const cleanCnpj = (cpfCnpjValue ?? '').replace(/\D/g, '');
+
+  //   if (clientType !== 'PJ' || cleanCnpj.length !== 14) {
+  //     return;
+  //   }
+
+  //   void handleConsultCnpj(cleanCnpj);
+  // }, [clientType, cpfCnpjValue, handleConsultCnpj]);
+
   async function handleSearchCep(cep: string) {
     const cleanCep = cep.replace(/\D/g, '');
 
@@ -427,7 +516,9 @@ export default function CreateClient() {
     try {
       const response = await apiCep.get(`/${cleanCep}/json`);
       const data = response.data;
+
       await new Promise((resolve) => setTimeout(resolve, 5000));
+
       if (data?.erro) {
         toast.error('CEP não encontrado.');
         return;
@@ -457,7 +548,7 @@ export default function CreateClient() {
           shouldTouch: true,
         },
       );
-      setValue('cep', cleanCep, {
+      setValue('cep', formatCepValue(cleanCep), {
         shouldDirty: true,
         shouldTouch: true,
       });
@@ -572,7 +663,6 @@ export default function CreateClient() {
               {clientType === 'PJ' && (
                 <Button
                   type="button"
-                  disabled
                   onClick={() => handleConsultCnpj(cnpj)}
                   className={cn(
                     'bg-background border-2 border-blue-600 text-blue-600',
@@ -592,11 +682,18 @@ export default function CreateClient() {
               Nome
             </Label>
 
-            <Input
-              id="name"
-              placeholder="Digite seu nome"
-              {...register('name')}
-            />
+            <InputGroup>
+              <InputGroupInput
+                id="name"
+                placeholder="Digite seu nome"
+                {...register('name')}
+              />
+              {loadingReceitaws && (
+                <InputGroupAddon align="inline-end">
+                  <Spinner />
+                </InputGroupAddon>
+              )}
+            </InputGroup>
 
             {errors.name && (
               <small className="text-sm text-red-400">
@@ -646,11 +743,18 @@ export default function CreateClient() {
                   Nome Fantasia
                 </Label>
 
-                <Input
-                  id="fantasyName"
-                  placeholder="Digite o nome fantasia"
-                  {...register('fantasyName')}
-                />
+                <InputGroup>
+                  <InputGroupInput
+                    id="fantasyName"
+                    placeholder="Digite o nome fantasia"
+                    {...register('fantasyName')}
+                  />
+                  {loadingReceitaws && (
+                    <InputGroupAddon align="inline-end">
+                      <Spinner />
+                    </InputGroupAddon>
+                  )}
+                </InputGroup>
 
                 {errors.fantasyName && (
                   <small className="text-sm text-red-400">
@@ -862,7 +966,7 @@ export default function CreateClient() {
 
                 <Button
                   type="button"
-                  disabled={loadingCep}
+                  disabled={loadingCep || loadingReceitaws}
                   onClick={() => handleSearchCep(getValues('cep') || '')}
                   className={cn(
                     'bg-background text-foreground/50 border-input border',
@@ -888,11 +992,11 @@ export default function CreateClient() {
               <InputGroup>
                 <InputGroupInput
                   id="address"
-                  readOnly={loadingCep}
+                  readOnly={loadingCep || loadingReceitaws}
                   placeholder="Digite o logradouro"
                   {...register('address')}
                 />
-                {loadingCep && (
+                {(loadingCep || loadingReceitaws) && (
                   <InputGroupAddon align="inline-end">
                     <Spinner />
                   </InputGroupAddon>
@@ -936,11 +1040,11 @@ export default function CreateClient() {
               <InputGroup>
                 <InputGroupInput
                   id="neighborhood"
-                  readOnly={loadingCep}
+                  readOnly={loadingCep || loadingReceitaws}
                   placeholder="Digite o bairro"
                   {...register('neighborhood')}
                 />
-                {loadingCep && (
+                {(loadingCep || loadingReceitaws) && (
                   <InputGroupAddon align="inline-end">
                     <Spinner />
                   </InputGroupAddon>
@@ -984,11 +1088,11 @@ export default function CreateClient() {
               <InputGroup>
                 <InputGroupInput
                   id="city"
-                  readOnly={loadingCep}
+                  readOnly={loadingCep || loadingReceitaws}
                   placeholder="Digite a cidade"
                   {...register('city')}
                 />
-                {loadingCep && (
+                {(loadingCep || loadingReceitaws) && (
                   <InputGroupAddon align="inline-end">
                     <Spinner />
                   </InputGroupAddon>
@@ -1010,11 +1114,11 @@ export default function CreateClient() {
               <InputGroup>
                 <InputGroupInput
                   id="state"
-                  readOnly={loadingCep}
+                  readOnly={loadingCep || loadingReceitaws}
                   placeholder="Digite o estado"
                   {...register('state')}
                 />
-                {loadingCep && (
+                {(loadingCep || loadingReceitaws) && (
                   <InputGroupAddon align="inline-end">
                     <Spinner />
                   </InputGroupAddon>
@@ -1038,7 +1142,7 @@ export default function CreateClient() {
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={loadingCep}
+                    disabled={loadingCep || loadingReceitaws}
                   >
                     <SelectTrigger id="uf" className="w-full">
                       <SelectValue placeholder="Selecione a UF" />

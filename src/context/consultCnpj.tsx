@@ -1,11 +1,20 @@
 'use client';
 
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { api } from '@/services/api';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
+import { toast } from 'react-toastify';
 
-type Consult = {
+export type Consult = {
   name: string;
   fantasyName: string;
   email: string;
+  phone: string;
   cep: string;
   street: string;
   number: string;
@@ -18,43 +27,74 @@ type Consult = {
 
 type ConsultCnpjContextType = {
   consult: Consult | null;
-  loading: boolean;
-  handleConsult: (cnpj: string) => Promise<void>;
+  loadingReceitaws: boolean;
+  handleReceitaws: (cnpj: string) => Promise<Consult | null>;
 };
 
 const ConsultCnpjContext = createContext({} as ConsultCnpjContextType);
 
+function extractPrimaryPhone(telefone?: string) {
+  if (!telefone) {
+    return '';
+  }
+
+  const [primaryPhone = ''] = telefone.split('/');
+  return primaryPhone.replace(/\D/g, '');
+}
+
 export function ConsultCnpjProvider({ children }: { children: ReactNode }) {
   const [consult, setConsult] = useState<Consult | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingReceitaws, setLoadingReceitaws] = useState(false);
 
-  async function handleConsult(numberCnpj: string) {
+  const handleReceitaws = useCallback(async (numberCnpj: string) => {
     try {
-      setLoading(true);
+      setLoadingReceitaws(true);
 
       const cnpj = numberCnpj.replace(/\D/g, '');
 
-      console.log(cnpj);
+      const response = await api.get(`/receitaws/${cnpj}`);
 
-      // const response = await apiConsultCnpj.get(`/${cnpj}`);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      // console.log(response.data);
+      if (response.data?.status && response.data.status !== 'OK') {
+        setConsult(null);
+        toast.error('CNPJ não encontrado.');
+        return null;
+      }
 
-      // setConsult(response.data);
+      const data = response.data;
+      const normalizedData: Consult = {
+        name: data.nome ?? '',
+        fantasyName: data.fantasia ?? '',
+        email: data.email ?? '',
+        phone: extractPrimaryPhone(data.telefone),
+        cep: data.cep ?? '',
+        street: data.logradouro ?? '',
+        number: data.numero ?? '',
+        city: data.municipio ?? '',
+        district: data.bairro ?? '',
+        complement: data.complemento ?? '',
+        uf: data.uf ?? '',
+        situation: data.situacao ?? '',
+      };
+
+      setConsult(normalizedData);
+      return normalizedData;
     } catch (error) {
       console.error(error);
-      // toast.error('Erro ao consultar CNPJ');
+      toast.error('Erro ao consultar CNPJ');
+      return null;
     } finally {
-      setLoading(false);
+      setLoadingReceitaws(false);
     }
-  }
+  }, []);
 
   return (
     <ConsultCnpjContext.Provider
       value={{
         consult,
-        loading,
-        handleConsult,
+        loadingReceitaws,
+        handleReceitaws,
       }}
     >
       {children}
