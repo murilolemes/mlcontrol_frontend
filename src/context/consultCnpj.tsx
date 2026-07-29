@@ -13,8 +13,9 @@ import { toast } from 'react-toastify';
 export type Consult = {
   name: string;
   fantasyName: string;
-  email: string;
-  phone: string;
+  email: string[];
+  phone: string[];
+  openingDate: string;
   cep: string;
   street: string;
   number: string;
@@ -33,13 +34,24 @@ type ConsultCnpjContextType = {
 
 const ConsultCnpjContext = createContext({} as ConsultCnpjContextType);
 
-function extractPrimaryPhone(telefone?: string) {
-  if (!telefone) {
-    return '';
-  }
+function splitDelimitedValues(value?: string) {
+  return (value ?? '')
+    .split(/[\/,;|\n]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
-  const [primaryPhone = ''] = telefone.split('/');
-  return primaryPhone.replace(/\D/g, '');
+function extractEmails(value?: string) {
+  const matches = value?.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi);
+
+  return [...new Set(matches?.map((item) => item.trim()) ?? [])];
+}
+
+function extractPhoneNumbers(value?: string) {
+  return splitDelimitedValues(value)
+    .map((item) => item.replace(/\D/g, ''))
+    .filter((item) => item.length >= 10)
+    .map((item) => item.slice(0, 11));
 }
 
 export function ConsultCnpjProvider({ children }: { children: ReactNode }) {
@@ -54,8 +66,6 @@ export function ConsultCnpjProvider({ children }: { children: ReactNode }) {
 
       const response = await api.get(`/receitaws/${cnpj}`);
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-
       if (response.data?.status && response.data.status !== 'OK') {
         setConsult(null);
         toast.error('CNPJ não encontrado.');
@@ -66,8 +76,9 @@ export function ConsultCnpjProvider({ children }: { children: ReactNode }) {
       const normalizedData: Consult = {
         name: data.nome ?? '',
         fantasyName: data.fantasia ?? '',
-        email: data.email ?? '',
-        phone: extractPrimaryPhone(data.telefone),
+        email: extractEmails(data.email),
+        phone: extractPhoneNumbers(data.telefone),
+        openingDate: data.abertura ?? data.openingDate ?? '',
         cep: data.cep ?? '',
         street: data.logradouro ?? '',
         number: data.numero ?? '',

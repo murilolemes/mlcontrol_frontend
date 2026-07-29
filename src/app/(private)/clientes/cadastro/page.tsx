@@ -17,6 +17,7 @@ import {
   differenceInYears,
   format,
   isValid,
+  parse,
   parseISO,
 } from 'date-fns';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
@@ -211,6 +212,40 @@ function formatCepValue(value: string) {
   return `${digits.slice(0, 2)}.${digits.slice(2, 5)}-${digits.slice(5)}`;
 }
 
+function formatPhoneValue(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+
+  if (digits.length <= 2) {
+    return digits;
+  }
+
+  if (digits.length <= 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+function getPhoneMask(value: string) {
+  return value.replace(/\D/g, '').length > 10
+    ? '(__) _____-____'
+    : '(__) ____-____';
+}
+
+function parseOpeningDate(value?: string) {
+  if (!value) {
+    return '';
+  }
+
+  const parsedDate = parse(value, 'dd/MM/yyyy', new Date());
+
+  if (!isValid(parsedDate)) {
+    return '';
+  }
+
+  return format(parsedDate, 'yyyy-MM-dd');
+}
+
 type MaskedInputProps = {
   id: string;
   mask: string;
@@ -218,6 +253,7 @@ type MaskedInputProps = {
   value?: string;
   name: string;
   className?: string;
+  disabled?: boolean;
   onBlur: () => void;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 };
@@ -231,6 +267,7 @@ function MaskedInput({
   className,
   onBlur,
   onChange,
+  disabled,
 }: MaskedInputProps) {
   const inputRef = useMask({
     mask,
@@ -247,6 +284,7 @@ function MaskedInput({
       onBlur={onBlur}
       name={name}
       className={className}
+      disabled={disabled}
     />
   );
 }
@@ -291,7 +329,6 @@ export default function CreateClient() {
   const maskCnpj = '__.___.___/____-__';
   const maskRg = '__.___.___-_';
   const maskIe = '___.___.___.___';
-  const maskPhone = '(__) _____-____';
   const maskCep = '__.___-___';
 
   const {
@@ -381,9 +418,24 @@ export default function CreateClient() {
         shouldDirty: true,
         shouldTouch: true,
       });
-      replaceEmails([{ address: data.email }]);
-      replacePhones([{ number: data.phone }]);
+      const emails = data.email;
+      const phones = data.phone;
+
+      replaceEmails(
+        emails.length
+          ? emails.map((address) => ({ address }))
+          : [{ address: '' }],
+      );
+      replacePhones(
+        phones.length
+          ? phones.map((number) => ({ number: formatPhoneValue(number) }))
+          : [{ number: '' }],
+      );
       setValue('cep', formatCepValue(data.cep), {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+      setValue('birthDate', parseOpeningDate(data.openingDate), {
         shouldDirty: true,
         shouldTouch: true,
       });
@@ -959,6 +1011,7 @@ export default function CreateClient() {
                         onChange={field.onChange}
                         onBlur={field.onBlur}
                         name={field.name}
+                        disabled={loadingReceitaws}
                       />
                     );
                   }}
@@ -1203,12 +1256,14 @@ export default function CreateClient() {
                         <Input
                           id={`email-${index}`}
                           placeholder="Digite seu email"
+                          disabled={loadingReceitaws}
                           {...register(`emails.${index}.address` as const)}
                         />
 
                         <Button
                           type="button"
                           onClick={() => appendEmail({ address: '' })}
+                          disabled={loadingReceitaws}
                           className={cn(
                             'bg-background text-foreground/50 border-input border',
                           )}
@@ -1221,6 +1276,7 @@ export default function CreateClient() {
                           <Button
                             type="button"
                             onClick={() => removeEmail(index)}
+                            disabled={loadingReceitaws}
                             className={cn(
                               'bg-background text-foreground/50 border-input border',
                             )}
@@ -1263,12 +1319,13 @@ export default function CreateClient() {
                             return (
                               <MaskedInput
                                 id={`phone-${index}`}
-                                mask={maskPhone}
+                                mask={getPhoneMask(phoneField.value || '')}
                                 placeholder="Digite seu telefone"
                                 value={phoneField.value || ''}
                                 onChange={phoneField.onChange}
                                 onBlur={phoneField.onBlur}
                                 name={phoneField.name}
+                                disabled={loadingReceitaws}
                               />
                             );
                           }}
@@ -1277,6 +1334,7 @@ export default function CreateClient() {
                         <Button
                           type="button"
                           onClick={() => appendPhone({ number: '' })}
+                          disabled={loadingReceitaws}
                           className={cn(
                             'bg-background text-foreground/50 border-input border',
                           )}
@@ -1289,6 +1347,7 @@ export default function CreateClient() {
                           <Button
                             type="button"
                             onClick={() => removePhone(index)}
+                            disabled={loadingReceitaws}
                             className={cn(
                               'bg-background text-foreground/50 border-input border',
                             )}
