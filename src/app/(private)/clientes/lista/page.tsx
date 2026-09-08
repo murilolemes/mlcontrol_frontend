@@ -1,7 +1,9 @@
 'use client';
 
-import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
-import { Button } from '@/components/ui/button';
+import { Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,12 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Field, FieldLabel } from '@/components/ui/field';
+
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from '@/components/ui/input-group';
+
 import {
   Pagination,
   PaginationContent,
@@ -22,6 +25,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+
 import {
   Select,
   SelectContent,
@@ -30,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
 import {
   Table,
   TableBody,
@@ -38,16 +43,20 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useClient } from '@/context/clientContext';
+
+import TriggerSideBar from '@/components/sideBar/trigger-sidebar';
+import { Button } from '@/components/ui/button';
+import { Field, FieldLabel } from '@/components/ui/field';
+import { useGetClient } from '@/features/clients/hooks/use-get-client';
 import { cn } from '@/lib/utils';
 import { formatCpfCnpj } from '@/utils/formatedCpfCnpj';
 import { DotsThreeIcon } from '@phosphor-icons/react';
-import { Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 
 export default function ClientList() {
-  const { clients } = useClient();
+  const {
+    clients,
+    // loading,
+  } = useGetClient();
 
   console.log('-->', clients);
   const [page, setPage] = useState(1);
@@ -170,7 +179,7 @@ export default function ClientList() {
                       <DropdownMenuSeparator />
 
                       <DropdownMenuItem
-                        onClick={() => handleDelete(client.id)}
+                        onClick={() => handleDelete(client.name)}
                         variant="destructive"
                       >
                         Delete
