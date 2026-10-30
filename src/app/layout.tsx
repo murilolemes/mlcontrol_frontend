@@ -1,17 +1,15 @@
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
-import { Geist, Montserrat } from 'next/font/google';
+import { Montserrat } from 'next/font/google';
 import 'react-toastify/dist/ReactToastify.css';
 import { Providers } from './providers';
 
 import { cn } from '@/lib/utils';
 import './globals.css';
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
-
 const montserrat = Montserrat({
   subsets: ['latin'],
   variable: '--font-montserrat',
-  weight: ['400', '500', '700'],
 });
 
 export const metadata: Metadata = {
@@ -28,16 +26,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={cn('font-sans', geist.variable)}>
-      <body
-        className={cn(
-          'bg-sidebar font-sans',
-          geist.variable,
-          montserrat.variable,
-        )}
-      >
+    <html lang="pt-BR" className={cn(montserrat.variable)}>
+      <body className={cn('bg-sidebar font-sans')}>
         <Providers>{children}</Providers>
       </body>
+      <Analytics />
     </html>
   );
 }

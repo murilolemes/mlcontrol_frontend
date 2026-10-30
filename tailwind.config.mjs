@@ -2,7 +2,7 @@ import lineClamp from '@tailwindcss/line-clamp';
 import scrollbarHide from 'tailwind-scrollbar-hide';
 
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -11,8 +11,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-sans)'],
-        montserrat: ['var(--font-montserrat)'],
+        sans: ['var(--font-montserrat)', 'sans-serif'],
       },
     },
   },
