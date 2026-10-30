@@ -35,7 +35,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useClient } from '@/context/clientContext';
+import { useGetClient } from '@/features/clients/hooks/use-get-client';
+
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -51,7 +52,10 @@ interface SearchClientProps {
 }
 
 export function SearchClient({ setClient }: SearchClientProps) {
-  const { clients } = useClient();
+  const {
+    clients,
+    // loading,
+  } = useGetClient();
 
   console.log('-->', clients);
   const [page, setPage] = useState(1);
@@ -98,12 +102,12 @@ export function SearchClient({ setClient }: SearchClientProps) {
         <Button
           type="button"
           className={cn(
-            'bg-background w-full border-2 border-blue-600 px-2 py-1.5 font-bold text-blue-600 md:h-full md:w-fit',
-            'hover:enabled:text-background text-xs transition-all duration-200 hover:enabled:bg-blue-600',
+            'w-full bg-blue-100 px-2 py-1.5 text-blue-700 md:h-full md:w-fit',
+            'transition-all duration-200 hover:enabled:bg-blue-200',
           )}
           onClick={() => setSearch('')}
         >
-          <Search size={16} />
+          <Search size={4} />
           Buscar
         </Button>
       </DialogTrigger>
@@ -154,8 +158,8 @@ export function SearchClient({ setClient }: SearchClientProps) {
                         <Button
                           type="button"
                           className={cn(
-                            'bg-background h-8 border-2 border-blue-600 font-bold text-blue-600',
-                            'hover:enabled:text-background text-xs transition-all duration-200 hover:enabled:bg-blue-600',
+                            'h-8 bg-blue-100 text-xs font-bold text-blue-600 duration-200',
+                            'hover:enabled:text-background transition-all hover:enabled:bg-blue-600',
                           )}
                           onClick={() => {
                             setClient({
