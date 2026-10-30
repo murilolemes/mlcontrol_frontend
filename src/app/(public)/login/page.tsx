@@ -77,6 +77,7 @@ export default function Login() {
             <Input
               id="login"
               placeholder="Digite seu login"
+              autoCapitalize='none'
               {...register('login')}
               className="placeholder:text-ring text-blue-900"
             />
