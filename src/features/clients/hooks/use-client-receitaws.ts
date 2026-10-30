@@ -148,9 +148,6 @@ export function useClientCnpj({
         setLoadingReceitaws(true);
 
         const data = await consultCnpj(cleanCnpj);
-        await new Promise((resolve) =>
-          setTimeout(resolve, 5000)
-        );
 
         if (!data) {
           toast.error('CNPJ não encontrado.');

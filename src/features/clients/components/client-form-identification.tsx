@@ -1,7 +1,7 @@
 'use client';
 
 import { Check } from 'lucide-react';
-import { Control, Controller, FieldErrors } from "react-hook-form";
+import { Control, Controller, FieldErrors } from 'react-hook-form';
 
 import {
   Select,
@@ -20,8 +20,9 @@ import { cn } from '@/lib/utils';
 import { validateCnpj } from '@/utils/validateCnpj';
 import { validateCpf } from '@/utils/validateCpf';
 
+import { Errors } from '@/components/forms/errors';
 import { clientMasks } from '../constants/client-masks';
-import { ClientFormSchema } from "../schemas/client-schema";
+import { ClientFormSchema } from '../schemas/client-schema';
 import { ClientType } from '../types/client';
 import { MaskedInputGroupInput } from './masked-input-group';
 
@@ -44,7 +45,7 @@ export function ClientIndentification({
   loadingReceitaws,
   setCnpj,
   handleConsultCnpj,
-  handleTypeChange
+  handleTypeChange,
 }: ClientFormIdentificationProps) {
   return (
     <div className="flex flex-col gap-2 md:flex-row">
@@ -76,11 +77,7 @@ export function ClientIndentification({
             )}
           />
         </div>
-        {errors.type && (
-          <small className="text-2sm text-red-400">
-            {errors.type.message}
-          </small>
-        )}
+        {errors.type && <Errors infError={errors.type.message} />}
       </div>
 
       <div className="flex flex-1 flex-col gap-1 md:flex-row md:items-end">
@@ -106,9 +103,7 @@ export function ClientIndentification({
                     <MaskedInputGroupInput
                       id="cpfCnpj"
                       mask={
-                        clientType === 'PF'
-                          ? clientMasks.cpf
-                          : clientMasks.cnpj
+                        clientType === 'PF' ? clientMasks.cpf : clientMasks.cnpj
                       }
                       placeholder={`Digite seu ${clientType === 'PF' ? 'CPF' : 'CNPJ'}`}
                       value={field.value}
@@ -131,11 +126,7 @@ export function ClientIndentification({
               }}
             />
 
-            {errors.cpfCnpj && (
-              <small className="text-sm text-red-400">
-                {errors.cpfCnpj.message}
-              </small>
-            )}
+            {errors.cpfCnpj && <Errors infError={errors.cpfCnpj.message} />}
           </div>
         </div>
         {/* BOTÃO DE CONSULTA */}
@@ -155,5 +146,5 @@ export function ClientIndentification({
         )}
       </div>
     </div>
-  )
+  );
 }

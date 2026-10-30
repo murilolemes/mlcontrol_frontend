@@ -16,7 +16,7 @@ import { ClientFormContact } from '@/features/clients/components/client-form-con
 import { ClientIndentification } from '@/features/clients/components/client-form-identification';
 import { ClientFormObservation } from '@/features/clients/components/client-form-observation';
 import { ClientFormPersonal } from '@/features/clients/components/client-form-person';
-import { initialFormValues } from '@/features/clients/constants/client-default-values';
+import { initialClientFormValues } from '@/features/clients/constants/client-default-values';
 import { useClientAddress } from '@/features/clients/hooks/use-client-address';
 import { useClientAge } from '@/features/clients/hooks/use-client-age';
 import { useClientCnpj } from '@/features/clients/hooks/use-client-receitaws';
@@ -35,7 +35,7 @@ export default function CreateClient() {
     formState: { errors },
   } = useForm<ClientFormSchema>({
     resolver: zodResolver(clientFormSchema),
-    defaultValues: initialFormValues,
+    defaultValues: initialClientFormValues,
   });
 
   useClientAge({
@@ -44,7 +44,7 @@ export default function CreateClient() {
   });
 
   const handleResetForm = useCallback(() => {
-    reset(initialFormValues);
+    reset(initialClientFormValues);
   }, [reset]);
 
   const {

@@ -2,7 +2,7 @@
 
 import { ClientFormSchema } from "../schemas/client-schema";
 
-export const initialFormValues: ClientFormSchema = {
+export const initialClientFormValues: ClientFormSchema = {
   name: '',
   fantasyName: '',
   type: 'PF',

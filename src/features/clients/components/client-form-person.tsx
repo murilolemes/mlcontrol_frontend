@@ -3,7 +3,12 @@
 import { format, parseISO } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
-import { Control, Controller, FieldErrors, UseFormRegister } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  FieldErrors,
+  UseFormRegister,
+} from 'react-hook-form';
 
 import {
   InputGroup,
@@ -28,15 +33,16 @@ import {
 
 import { Calendar } from '@/components/ui/calendar';
 import { Field } from '@/components/ui/field';
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { clientMasks } from '@/features/clients/constants/client-masks';
 import { cn } from '@/lib/utils';
 
+import { Errors } from '@/components/forms/errors';
 import { ClientFormSchema } from '../schemas/client-schema';
 import { ClientType } from '../types/client';
-import { MaskedInput } from "./masked-input";
+import { MaskedInput } from './masked-input';
 
 type ClientFormPersonalProps = {
   control: Control<ClientFormSchema>;
@@ -44,20 +50,20 @@ type ClientFormPersonalProps = {
   register: UseFormRegister<ClientFormSchema>;
   clientType: ClientType;
   loadingReceitaws: boolean;
-}
+};
 
 export function ClientFormPersonal({
   control,
   errors,
   register,
   clientType,
-  loadingReceitaws
+  loadingReceitaws,
 }: ClientFormPersonalProps) {
   const [openCalendar, setOpenCalendar] = useState(false);
   return (
     <>
       {/* NOME */}
-      <div className="flex flex-1 flex-col gap-0.5" >
+      <div className="flex flex-1 flex-col gap-0.5">
         <Label htmlFor="name" className="text-foreground/60">
           Nome
         </Label>
@@ -76,13 +82,7 @@ export function ClientFormPersonal({
           )}
         </InputGroup>
 
-        {
-          errors.name && (
-            <small className="text-sm text-red-400">
-              {errors.name.message}
-            </small>
-          )
-        }
+        {errors.name && <Errors infError={errors.name.message} />}
       </div>
 
       <div className="flex flex-col gap-2 md:flex-row">
@@ -174,10 +174,7 @@ export function ClientFormPersonal({
                   {loadingReceitaws ? (
                     <Spinner />
                   ) : (
-                    <CalendarIcon
-                      size={16}
-                      className="text-foreground/60"
-                    />
+                    <CalendarIcon size={16} className="text-foreground/60" />
                   )}
                 </PopoverTrigger>
 
@@ -187,18 +184,14 @@ export function ClientFormPersonal({
                 >
                   <Calendar
                     mode="single"
-                    selected={
-                      field.value ? parseISO(field.value) : undefined
-                    }
+                    selected={field.value ? parseISO(field.value) : undefined}
                     defaultMonth={
                       field.value ? parseISO(field.value) : undefined
                     }
                     captionLayout="dropdown"
                     onSelect={(selectedDate) => {
                       field.onChange(
-                        selectedDate
-                          ? format(selectedDate, 'yyyy-MM-dd')
-                          : '',
+                        selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '',
                       );
 
                       setOpenCalendar(false);
@@ -251,10 +244,7 @@ export function ClientFormPersonal({
         {/* INSCRIÇÃO ESTADUAL */}
         {clientType === 'PJ' && (
           <div className="flex flex-col gap-0.5">
-            <Label
-              htmlFor="stateRegistration"
-              className="text-foreground/60"
-            >
+            <Label htmlFor="stateRegistration" className="text-foreground/60">
               Inscrição Estadual
             </Label>
 
@@ -286,53 +276,51 @@ export function ClientFormPersonal({
         )}
       </div>
 
-      {
-        clientType === 'PF' && (
-          <div className="flex flex-col gap-2 md:flex-row">
-            {/* PROFISSÃO */}
-            <div className="flex flex-1 flex-col gap-0.5">
-              <Label htmlFor="occupation" className="text-foreground/60">
-                Profissão
-              </Label>
+      {clientType === 'PF' && (
+        <div className="flex flex-col gap-2 md:flex-row">
+          {/* PROFISSÃO */}
+          <div className="flex flex-1 flex-col gap-0.5">
+            <Label htmlFor="occupation" className="text-foreground/60">
+              Profissão
+            </Label>
 
-              <Input
-                id="occupation"
-                placeholder="Digite a profissão"
-                {...register('occupation')}
-              />
+            <Input
+              id="occupation"
+              placeholder="Digite a profissão"
+              {...register('occupation')}
+            />
 
-              {errors.occupation && (
-                <small className="text-sm text-red-400">
-                  {errors.occupation.message}
-                </small>
-              )}
-            </div>
-
-            {/* SEXO */}
-            <div className="flex flex-1 flex-col gap-0.5">
-              <Label className="text-foreground/60">Sexo</Label>
-              <Controller
-                control={control}
-                name="gender"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="gender" className="w-full">
-                      <SelectValue placeholder="Selecione o sexo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="M">Masculino</SelectItem>
-                        <SelectItem value="F">Feminino</SelectItem>
-                        <SelectItem value="O">Outros</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
+            {errors.occupation && (
+              <small className="text-sm text-red-400">
+                {errors.occupation.message}
+              </small>
+            )}
           </div>
-        )
-      }
+
+          {/* SEXO */}
+          <div className="flex flex-1 flex-col gap-0.5">
+            <Label className="text-foreground/60">Sexo</Label>
+            <Controller
+              control={control}
+              name="gender"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="gender" className="w-full">
+                    <SelectValue placeholder="Selecione o sexo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="M">Masculino</SelectItem>
+                      <SelectItem value="F">Feminino</SelectItem>
+                      <SelectItem value="O">Outros</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+        </div>
+      )}
     </>
-  )
+  );
 }

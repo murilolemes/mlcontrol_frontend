@@ -71,9 +71,7 @@ export function useClientAddress(
       try {
         setLoadingCep(true);
 
-        const data = await consultCep(cep)
-
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        const data = await consultCep(cep);
 
         if (!data) {
           toast.error('CEP não encontrado.');

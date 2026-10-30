@@ -5,7 +5,7 @@ import { Email } from "./email";
 export type ClientType = 'PF' | 'PJ';
 
 export type Client = {
-  id?: string;
+  id: string;
   name: string;
   fantasyName?: string;
   type: 'PF' | 'PJ';

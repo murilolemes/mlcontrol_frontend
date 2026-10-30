@@ -179,7 +179,7 @@ export default function ClientList() {
                       <DropdownMenuSeparator />
 
                       <DropdownMenuItem
-                        onClick={() => handleDelete(client.name)}
+                        onClick={() => handleDelete(client.id)}
                         variant="destructive"
                       >
                         Delete
